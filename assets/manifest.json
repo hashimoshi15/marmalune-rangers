@@ -1,0 +1,29 @@
+{
+ "v": 1,
+ "generator": "game/tools/bake_textures.mjs",
+ "version": "1.1.0",
+ "date": "2026-10-16",
+ "files": {
+  "detail": {
+   "file": "terrain_detail_1024.png",
+   "w": 1024,
+   "h": 1024,
+   "ch": 3,
+   "bytes": 1158418
+  },
+  "surf": {
+   "file": "surface_grain_512.png",
+   "w": 512,
+   "h": 512,
+   "ch": 3,
+   "bytes": 240573
+  },
+  "cloud": {
+   "file": "cloud_noise_1024.png",
+   "w": 1024,
+   "h": 1024,
+   "ch": 1,
+   "bytes": 351271
+  }
+ }
+}

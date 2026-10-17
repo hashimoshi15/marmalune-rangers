@@ -1,0 +1,152 @@
+{
+ "name": "Marmalune Rangers",
+ "version": "1.2.0",
+ "commit": "3424d51",
+ "date": "2026-10-17",
+ "channel": "public",
+ "id": "1.2.0-3424d51-81ac27b6",
+ "iconKey": "0a0f2e76ffcf4c3d",
+ "files": [
+  {
+   "path": "three.7b1c5d75b2.js",
+   "bytes": 668024
+  },
+  {
+   "path": "core.a34883121b.js",
+   "bytes": 519399
+  },
+  {
+   "path": "world.69dc8d6cb8.js",
+   "bytes": 220667
+  },
+  {
+   "path": "data.c1a4d75603.js",
+   "bytes": 245170
+  },
+  {
+   "path": "geo.2ebbe8c87e.js",
+   "bytes": 528418
+  },
+  {
+   "path": "actors.a5a3bea646.js",
+   "bytes": 513313
+  },
+  {
+   "path": "pve.8403ec159e.js",
+   "bytes": 496414
+  },
+  {
+   "path": "arena.2eddb67b48.js",
+   "bytes": 511467
+  },
+  {
+   "path": "royale.3548ebfc3e.js",
+   "bytes": 441779
+  },
+  {
+   "path": "menus.c2d015aa74.js",
+   "bytes": 275798
+  },
+  {
+   "path": "lang-de.122f963e9b.js",
+   "bytes": 106352
+  },
+  {
+   "path": "lang-es.eefec63a4d.js",
+   "bytes": 109076
+  },
+  {
+   "path": "lang-fr.b044673d63.js",
+   "bytes": 110621
+  },
+  {
+   "path": "lang-id.92195a9871.js",
+   "bytes": 103905
+  },
+  {
+   "path": "lang-it.8bdac96b29.js",
+   "bytes": 107665
+  },
+  {
+   "path": "lang-ko.162ecb55d9.js",
+   "bytes": 111987
+  },
+  {
+   "path": "lang-pt-br.a9a00eb4d8.js",
+   "bytes": 105931
+  },
+  {
+   "path": "lang-ru.287da492d6.js",
+   "bytes": 143283
+  },
+  {
+   "path": "lang-zh-hans.ed766516fb.js",
+   "bytes": 103509
+  },
+  {
+   "path": "lang-zh-hant.135144d69b.js",
+   "bytes": 103018
+  },
+  {
+   "path": "lang-more.0dbdbab1b8.js",
+   "bytes": 247438
+  },
+  {
+   "path": "main.cb191116bb.js",
+   "bytes": 30970
+  },
+  {
+   "path": "style.4e0cb382d6.css",
+   "bytes": 126782
+  },
+  {
+   "path": "assets/cloud_noise_1024.png",
+   "bytes": 351271
+  },
+  {
+   "path": "assets/manifest.json",
+   "bytes": 456
+  },
+  {
+   "path": "assets/surface_grain_512.png",
+   "bytes": 240573
+  },
+  {
+   "path": "assets/terrain_detail_1024.png",
+   "bytes": 1158418
+  },
+  {
+   "path": "icon.svg",
+   "bytes": 3228
+  },
+  {
+   "path": "icon-192.png",
+   "bytes": 43775
+  },
+  {
+   "path": "icon-512.png",
+   "bytes": 201984
+  },
+  {
+   "path": "icon-maskable-512.png",
+   "bytes": 213887
+  },
+  {
+   "path": "apple-touch-icon.png",
+   "bytes": 38372
+  },
+  {
+   "path": "manifest.webmanifest",
+   "bytes": 859
+  },
+  {
+   "path": "index.html",
+   "bytes": 30162
+  },
+  {
+   "path": "sw.js",
+   "bytes": 9990
+  }
+ ],
+ "previous": []
+}
