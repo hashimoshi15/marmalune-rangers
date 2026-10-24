@@ -4,9 +4,9 @@
 A bright 3D space-action theme park you can play in the browser (phones in landscape, desktop, gamepad; 12 languages).
 
 **▶ プレイ / Play: https://hashimoshi15.github.io/marmalune-rangers/**
-**⬇ ダウンロード版 / Download (offline ZIP): https://hashimoshi15.github.io/marmalune-rangers/downloads/marmalune-rangers-v1.2.0.zip**
+**⬇ ダウンロード版 / Download (offline ZIP): https://hashimoshi15.github.io/marmalune-rangers/downloads/marmalune-rangers-v1.3.0.zip**
 
-現在の版 / Current version: **v1.2.0**（タイトル画面右上に版とビルドIDを表示 / shown top-right on the title screen）
+現在の版 / Current version: **v1.3.0**（タイトル画面右上に版とビルドIDを表示 / shown top-right on the title screen）
 
 ## あそびかた / How to play
 - ログイン不要・無料。ブラウザで上のリンクを開くだけ。初回のあとはオフラインでも起動します。
@@ -14,6 +14,14 @@ A bright 3D space-action theme park you can play in the browser (phones in lands
 - Android / PC: タイトル画面の全画面ボタン。
 - ダウンロード版: ZIP を展開して `index.html` を開く（ネット不要。詳しくは同梱の README.txt）。
 - セーブは各端末のブラウザ内に保存されます。設定 → ゲーム →「セーブコード」で別の端末へ移せます。
+
+## v1.3.0 のおもな変更 / What's new in 1.3.0
+- 敵ロボット（ギズモブ）11種類とボス4体を全面リデザイン：種類ごとの色・形・シール柄、待機やジャンプの動き、攻撃前の構え、やられると部品と紙吹雪がポン。地域ごとの塗装（海はサンゴ色、雪はマフラーなど）
+- 新しい空：もこもこの雲、遠くの浮島、地域ごとの虹・夕焼け・オーロラ・雪・気球。地面の模様、波打ち際、光の色も一新
+- 5つの地域の作り込み：スタートから見える大きな目印、足もとの貝・サボテン・光るキノコ・氷・ガラクタ、小さな生き物
+- 地域ごとの仕掛け：海藻ジャンプ台、上昇気流、転がる岩、胞子キャンプ、氷の結晶、ベルトコンベア、マグネットクレーン
+- お祭りの町になったフィズポート、新しいタイトル画面、仕上がった各モードの会場
+- 日本語・韓国語の改行、小さい画面と大きな文字の表示、動作の軽さを改善
 
 ## v1.2.0 のおもな変更 / What's new in 1.2.0
 - 4人のレンジャーと着せ替え（レンジャーロッカー）、見た目に反映されるコスメ

@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Marmalune Rangers</title>
 <meta name="description" content="Marmalune Rangers — a bright 3D space-action theme park you can play in the browser. No login, no purchases.">
-<meta name="mr-build" content="1.2.0-3424d51-81ac27b6">
+<meta name="mr-build" content="1.3.0-8e69389-64d40b47">
 <meta name="theme-color" content="#2b7fe0">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Marmalune">
@@ -117,6 +117,9 @@ html.mr-lb,html.mr-lb body{background:radial-gradient(ellipse at 50% 40%,#2a3f8f
   }
   var T = D[lang || 'en'] || D.en;
   root.setAttribute('lang', lang || 'en');
+  // the page's own language from the first paint (the public page and the ZIP ship a static <html lang>; 01_i18n.js
+  // sets the same code once every module has run): screen readers, hyphenation and the ja/ko line-breaking rules
+  try { document.documentElement.lang = lang || 'en'; } catch (e) { /* ignore */ }
   if (rm) root.classList.add('mr-rm');
   // wordmark: one span per letter, a little tilt and a staggered bob (like the title logo)
   var logo = root.querySelector('.ms-logo');
@@ -301,7 +304,7 @@ html.mr-lb,html.mr-lb body{background:radial-gradient(ellipse at 50% 40%,#2a3f8f
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap"></noscript>
-<link rel="stylesheet" href="style.4e0cb382d6.css">
+<link rel="stylesheet" href="style.3b45869c7a.css">
 <div id="app">
   <div id="ui">
     <div id="hud" hidden></div>
@@ -313,32 +316,23 @@ html.mr-lb,html.mr-lb body{background:radial-gradient(ellipse at 50% 40%,#2a3f8f
     <div id="fatal" hidden></div>
   </div>
 </div>
-<script>(function(){var s=document.getElementById('mr-splash'),l=s&&s.getAttribute('lang');if(l)document.documentElement.lang=l;})();window.MR_BOOT&&MR_BOOT.ext&&MR_BOOT.ext([0.1151,0.0895,0.038,0.0422,0.091,0.0884,0.0855,0.0881,0.0761,0.0475,0.0183,0.0188,0.0191,0.0179,0.0185,0.0193,0.0183,0.0247,0.0178,0.0177,0.0426,0.0053]);</script>
+<script>(function(){var s=document.getElementById('mr-splash'),l=s&&s.getAttribute('lang');if(l)document.documentElement.lang=l;})();window.MR_LANGS={"de":"lang-de.7159607968.js","es":"lang-es.87e4531680.js","fr":"lang-fr.377491dd25.js","id":"lang-id.94f549ddce.js","it":"lang-it.a600970f10.js","ja":"lang-ja.8d8a76f665.js","ko":"lang-ko.e319c479b6.js","pt-BR":"lang-pt-br.8a50fb254b.js","ru":"lang-ru.d6dbdab0a9.js","zh-Hans":"lang-zh-hans.2407c6082e.js","zh-Hant":"lang-zh-hant.f5e3f8d8e5.js"};window.MR_LANG_PICK=(function(){var l=document.documentElement.lang;return window.MR_LANGS[l]?l:null;})();(function(){var b=[668024,597876,256438,245359,643271,559867,768038,590863,491967,283518,18336,30970],lb={"de":128062,"es":130879,"fr":132897,"id":124701,"it":129368,"ja":26254,"ko":135864,"pt-BR":127662,"ru":173571,"zh-Hans":124516,"zh-Hant":124102},p=window.MR_LANG_PICK,t=0,i,w=[];if(p)b.push(lb[p]);for(i=0;i<b.length;i++)t+=b[i];for(i=0;i<b.length;i++)w.push(Math.round(b[i]/t*1e4)/1e4);window.MR_BOOT&&MR_BOOT.ext&&MR_BOOT.ext(w);})();</script>
 <script src="three.7b1c5d75b2.js" onload="window.MR_BOOT&&MR_BOOT.got(0)"></script>
 <script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js" onload="window.MR_BOOT&&MR_BOOT.got(0)"><\/script>');</script>
 <script>window.THREE||document.write('<script src="https://unpkg.com/three@0.159.0/build/three.min.js" onload="window.MR_BOOT&&MR_BOOT.got(0)"><\/script>');</script>
 <script>window.THREE||(window.MR_BOOT&&MR_BOOT.noEngine&&MR_BOOT.noEngine());</script>
-<script>window.MR_BUILD={"version":"1.2.0","commit":"3424d51","date":"2026-10-17","channel":"public","id":"1.2.0-3424d51-81ac27b6"};window.MR_PAGES={"build":"1.2.0-3424d51-81ac27b6","sw":"sw.js"};</script>
-<script src="core.a34883121b.js" onload="window.MR_BOOT&&MR_BOOT.got(1)" onerror="window.MR_BOOT&&MR_BOOT.lost(1)"></script>
-<script src="world.69dc8d6cb8.js" onload="window.MR_BOOT&&MR_BOOT.got(2)" onerror="window.MR_BOOT&&MR_BOOT.lost(2)"></script>
-<script src="data.c1a4d75603.js" onload="window.MR_BOOT&&MR_BOOT.got(3)" onerror="window.MR_BOOT&&MR_BOOT.lost(3)"></script>
-<script src="geo.2ebbe8c87e.js" onload="window.MR_BOOT&&MR_BOOT.got(4)" onerror="window.MR_BOOT&&MR_BOOT.lost(4)"></script>
-<script src="actors.a5a3bea646.js" onload="window.MR_BOOT&&MR_BOOT.got(5)" onerror="window.MR_BOOT&&MR_BOOT.lost(5)"></script>
-<script src="pve.8403ec159e.js" onload="window.MR_BOOT&&MR_BOOT.got(6)" onerror="window.MR_BOOT&&MR_BOOT.lost(6)"></script>
-<script src="arena.2eddb67b48.js" onload="window.MR_BOOT&&MR_BOOT.got(7)" onerror="window.MR_BOOT&&MR_BOOT.lost(7)"></script>
-<script src="royale.3548ebfc3e.js" onload="window.MR_BOOT&&MR_BOOT.got(8)" onerror="window.MR_BOOT&&MR_BOOT.lost(8)"></script>
-<script src="menus.c2d015aa74.js" onload="window.MR_BOOT&&MR_BOOT.got(9)" onerror="window.MR_BOOT&&MR_BOOT.lost(9)"></script>
-<script src="lang-de.122f963e9b.js" onload="window.MR_BOOT&&MR_BOOT.got(10)" onerror="window.MR_BOOT&&MR_BOOT.lost(10)"></script>
-<script src="lang-es.eefec63a4d.js" onload="window.MR_BOOT&&MR_BOOT.got(11)" onerror="window.MR_BOOT&&MR_BOOT.lost(11)"></script>
-<script src="lang-fr.b044673d63.js" onload="window.MR_BOOT&&MR_BOOT.got(12)" onerror="window.MR_BOOT&&MR_BOOT.lost(12)"></script>
-<script src="lang-id.92195a9871.js" onload="window.MR_BOOT&&MR_BOOT.got(13)" onerror="window.MR_BOOT&&MR_BOOT.lost(13)"></script>
-<script src="lang-it.8bdac96b29.js" onload="window.MR_BOOT&&MR_BOOT.got(14)" onerror="window.MR_BOOT&&MR_BOOT.lost(14)"></script>
-<script src="lang-ko.162ecb55d9.js" onload="window.MR_BOOT&&MR_BOOT.got(15)" onerror="window.MR_BOOT&&MR_BOOT.lost(15)"></script>
-<script src="lang-pt-br.a9a00eb4d8.js" onload="window.MR_BOOT&&MR_BOOT.got(16)" onerror="window.MR_BOOT&&MR_BOOT.lost(16)"></script>
-<script src="lang-ru.287da492d6.js" onload="window.MR_BOOT&&MR_BOOT.got(17)" onerror="window.MR_BOOT&&MR_BOOT.lost(17)"></script>
-<script src="lang-zh-hans.ed766516fb.js" onload="window.MR_BOOT&&MR_BOOT.got(18)" onerror="window.MR_BOOT&&MR_BOOT.lost(18)"></script>
-<script src="lang-zh-hant.135144d69b.js" onload="window.MR_BOOT&&MR_BOOT.got(19)" onerror="window.MR_BOOT&&MR_BOOT.lost(19)"></script>
-<script src="lang-more.0dbdbab1b8.js" onload="window.MR_BOOT&&MR_BOOT.got(20)" onerror="window.MR_BOOT&&MR_BOOT.lost(20)"></script>
-<script src="main.cb191116bb.js" onload="window.MR_BOOT&&MR_BOOT.got(21)" onerror="window.MR_BOOT&&MR_BOOT.lost(21)"></script>
+<script>window.MR_BUILD={"version":"1.3.0","commit":"8e69389","date":"2026-10-24","channel":"public","id":"1.3.0-8e69389-64d40b47"};window.MR_PAGES={"build":"1.3.0-8e69389-64d40b47","sw":"sw.js"};</script>
+<script src="core.83b77a8797.js" onload="window.MR_BOOT&&MR_BOOT.got(1)" onerror="window.MR_BOOT&&MR_BOOT.lost(1)"></script>
+<script src="world.b2c77c0671.js" onload="window.MR_BOOT&&MR_BOOT.got(2)" onerror="window.MR_BOOT&&MR_BOOT.lost(2)"></script>
+<script src="data.ecb832ab74.js" onload="window.MR_BOOT&&MR_BOOT.got(3)" onerror="window.MR_BOOT&&MR_BOOT.lost(3)"></script>
+<script src="geo.cdb57ca820.js" onload="window.MR_BOOT&&MR_BOOT.got(4)" onerror="window.MR_BOOT&&MR_BOOT.lost(4)"></script>
+<script src="actors.ed582a6d95.js" onload="window.MR_BOOT&&MR_BOOT.got(5)" onerror="window.MR_BOOT&&MR_BOOT.lost(5)"></script>
+<script src="pve.2ce7ba63af.js" onload="window.MR_BOOT&&MR_BOOT.got(6)" onerror="window.MR_BOOT&&MR_BOOT.lost(6)"></script>
+<script src="arena.93a2a9a390.js" onload="window.MR_BOOT&&MR_BOOT.got(7)" onerror="window.MR_BOOT&&MR_BOOT.lost(7)"></script>
+<script src="royale.bd0f5abd76.js" onload="window.MR_BOOT&&MR_BOOT.got(8)" onerror="window.MR_BOOT&&MR_BOOT.lost(8)"></script>
+<script src="menus.77d0ea9ba5.js" onload="window.MR_BOOT&&MR_BOOT.got(9)" onerror="window.MR_BOOT&&MR_BOOT.lost(9)"></script>
+<script src="lang-en.a2ee943995.js" onload="window.MR_BOOT&&MR_BOOT.got(10)" onerror="window.MR_BOOT&&MR_BOOT.lost(10)"></script>
+<script>window.MR_LANG_PICK&&document.write('<script src="'+window.MR_LANGS[window.MR_LANG_PICK]+'" onload="window.MR_BOOT&&MR_BOOT.got(12)" onerror="window.MR_BOOT&&MR_BOOT.got(12)"><\/script>');</script>
+<script src="main.cb191116bb.js" onload="window.MR_BOOT&&MR_BOOT.got(11)" onerror="window.MR_BOOT&&MR_BOOT.lost(11)"></script>
 
 </body></html>

@@ -1,0 +1,1299 @@
+/* style.css — container-unit copy (00b_screen.js convertCss) where container queries exist, as written elsewhere */
+@supports (width: 1cqw) {
+/* Marmalune Rangers — single-look playful game UI (deliberately one visual world, no theme switch).
+   Layout: fullscreen canvas, touch layer above it, DOM UI on top; HUD hugs safe-area edges. */
+:root {
+  --ink: #1e1a4d;        /* outlines + text */
+  --ink-soft: #4a4680;
+  --panel: #f3faff;      /* sky-tinted white panels */
+  --panel-2: #dff1ff;
+  --sky: #33b5ff;
+  --mint: #3fe0b8;
+  --sun: #ffd23f;
+  --coral: #ff6b8b;
+  --grape: #8f6bff;
+  --danger: #ff4d5e;
+  /* deeper twins for text on colour: white bold button labels (3.7-4.5:1), badges (--badge: white 12 px, 4.7:1) and
+     grape headings on light panels (5.6:1) */
+  --sky-deep: #1e88e5; --coral-deep: #e8456f; --grape-deep: #7d5bf0; --grape-ink: #6a48d8; --badge: #d6315c;
+  --good: #33d17a;
+  --shadow: rgba(30, 26, 77, 0.35);
+  --r-common: #c3cbd6; --r-uncommon: #3ddc97; --r-rare: #4aa8ff; --r-epic: #b26bff; --r-legend: #ffb627; --r-mythic: #ff4d6d;
+  --team-a: #ff8a1f; --team-b: #3d7bff;
+  --f-display: 'Dela Gothic One', 'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', 'Arial Rounded MT Bold', system-ui, sans-serif;
+  --f-body: 'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', 'PingFang SC', 'Microsoft YaHei', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  --radius: 18px;
+  --outline: 3px solid var(--ink);
+  --hud-scale: 1;
+  /* Text & UI size (Settings → Accessibility, 08_hud layoutVars): --ui-t scales HUD text, --ui-mz zooms
+     menus, --mm-px is the minimap size. Touch buttons follow the separate button size (--ui-u). */
+  --ui-t: 1; --ui-mz: 1; --mm-px: 120px;
+  /* motion: short, springy, transform/opacity only (07_ui.js / 08_hud.js drive the rest) */
+  --ease-out: cubic-bezier(.2, .9, .3, 1);
+  --ease-in: cubic-bezier(.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-bouncy: cubic-bezier(.3, 1.9, .5, 1);
+  color-scheme: light;
+}
+:lang(zh-Hans) { --f-display: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif; --f-body: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif; }
+:lang(zh-Hant) { --f-display: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', system-ui, sans-serif; --f-body: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', system-ui, sans-serif; }
+:lang(ko) { --f-display: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif; --f-body: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif; }
+:lang(ru) { --f-display: 'M PLUS Rounded 1c', system-ui, sans-serif; }
+/* Display weight + outline per language (--fw-d, --ds): Dela Gothic One is one heavy weight, but zh / ko headings fall
+   back to system fonts and ru to M PLUS Rounded, whose 400 weight is thin — under a 3-5 px outline the fill vanished
+   and the headings looked hollow. There the display face is drawn at 800 with a ~1 px outline (every outlined display
+   rule writes its stroke as max(1px, calc(<size> * var(--ds, 1)))). */
+:root { --fw-d: 400; --ds: 1; }
+:lang(zh-Hans), :lang(zh-Hant), :lang(ko) { --fw-d: 800; --ds: 0.34; }
+:lang(ru) { --fw-d: 800; --ds: 0.5; }
+/* Japanese / Korean: lines break at spaces, after punctuation and at the phrase breaks 07_ui puts into Japanese text
+   (<wbr>: G.UI.wbr / G.UI.setText, also between the known words of a katakana compound), never inside a word
+   ("ミッションクリ/ア", "すすも/う"), clamped descriptions included; only a single word longer than its whole box still
+   wraps rather than overflow. (Equal-specificity rules later in the sheet, e.g. the save code's break-all, still win.) */
+:lang(ja), :lang(ko) { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
+:lang(ja) .mm-sug-text, :lang(ko) .mm-sug-text { -webkit-line-clamp: 3; }
+/* Rally track cards on a tablet / desktop (a 105 px name at 13 px): "グロウキャップ・" came out a hair wider than the card, so
+   the fallback above started the next line with "・"; slightly tighter tracking keeps each part of the name whole */
+html:not(.gh-short):lang(ja) .rr-tcard h3 { letter-spacing: -0.03em; }
+
+html, body { height: 100%; background: #0d1030; overflow: hidden; }
+#app { position: fixed; inset: 0; overflow: hidden; background: #8fd8ff; font-family: var(--f-body); color: var(--ink);
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; touch-action: none; }
+#gl { position: absolute; inset: 0; display: block; z-index: 0; }
+#touch { position: absolute; inset: 0; z-index: 2; touch-action: none; pointer-events: none; }
+#touch.active { pointer-events: auto; }
+#ui { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+#ui button, #ui .clickable, #ui .panel, #ui .modal, #ui .screen { pointer-events: auto; }
+#ui .screen.passthrough { pointer-events: none; }
+/* Upright phone (frame rotated by G.Screen): native panning cannot follow the rotation, so menus are
+   scrolled by 07_ui.js; stop the browser from starting (and cancelling) its own pan. */
+html.force-landscape #ui .screen, html.force-landscape #ui .screen * { touch-action: none !important; }
+button { font-family: inherit; color: inherit; }
+[hidden] { display: none !important; }
+
+/* ---------- Touch controls ---------- */
+.joy-base { position: absolute; left: 0; top: 0; width: 116px; height: 116px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.20), rgba(255,255,255,0.08)); border: 3px solid rgba(255,255,255,0.55); pointer-events: none; }
+.joy-knob { position: absolute; left: 30px; top: 30px; width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.85);
+  box-shadow: 0 4px 0 rgba(30,26,77,0.35); border: 3px solid var(--ink); }
+/* border-box: the layout engine (07c) sizes and spaces buttons by their full diameter */
+/* Press: instant squash + inner glow; release springs back with a little overshoot (transition on the
+   base state). The glow is an inner pseudo layer (opacity only), the outer ring a cheap box-shadow. */
+.tbtn { position: absolute; box-sizing: border-box; width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; color: var(--ink);
+  background: rgba(255,255,255,0.72); border: 3px solid var(--ink); pointer-events: auto; touch-action: none;
+  /* glossy toy-button bevel: a light crescent along the top inside the rim, a soft shade along the bottom, the ink drop
+     under it (the held state, .down, swaps these for an inset "pushed in" shadow) */
+  box-shadow: inset 0 5px 0 rgba(255,255,255,0.4), inset 0 -4px 0 rgba(30,26,77,0.13), 0 5px 0 rgba(30,26,77,0.4);
+  transform: scale(var(--hud-scale)); transition: transform 0.3s var(--ease-bouncy), box-shadow 0.22s var(--ease-out); --cd: 0; overflow: hidden; }
+.tbtn::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 50% 42%, rgba(255,255,255,0.95), rgba(255,255,255,0.35) 45%, rgba(255,255,255,0) 72%); opacity: 0; transition: opacity 0.3s var(--ease-out); pointer-events: none; }
+.tbtn::after { content: ''; position: absolute; inset: 0; background: rgba(30,26,77,0.55); transform-origin: bottom; transform: scaleY(var(--cd)); pointer-events: none; }
+.tbtn .ico { width: 58%; height: 58%; display: block; position: relative; z-index: 1; }
+.tbtn .ico svg { width: 100%; height: 100%; display: block; }
+.tbtn .cd { position: absolute; z-index: 2; font: 800 15px var(--f-body); color: #fff; text-shadow: 0 2px 0 var(--ink); }
+/* (held: the disc keeps its own colour and its icon — a held fire button used to turn into a blank pale disc — and
+   reads as pushed in: a little smaller, an inset ink shadow along its top, and the glow only as a ring outside it) */
+.tbtn.down { transform: scale(calc(var(--hud-scale) * 0.9)); box-shadow: inset 0 4px 0 rgba(30,26,77,0.34), inset 0 -2px 0 rgba(255,255,255,0.28), 0 1px 0 rgba(30,26,77,0.45), 0 0 0 3px rgba(255,255,255,0.9), 0 0 14px 5px rgba(255,255,255,0.55);
+  transition-duration: 0.05s, 0.05s; }
+.tbtn.down .ico { filter: drop-shadow(0 1px 0 rgba(30,26,77,0.45)); }
+/* cooldown finished: one soft flash. 06_input adds .cd-done only on the frame a running cooldown completes
+   (and takes it off again), so a button that is already ready, or that re-appears, never flashes; .ready
+   stays the plain state class (mode styles may use it). */
+.tbtn.cd-done::before { animation: tbReady 0.5s var(--ease-out) 1; }
+@keyframes tbReady { 0% { opacity: 0.85; } 100% { opacity: 0; } }
+/* Right-thumb cluster: two arcs around the fire button in the bottom-right corner. */
+.tb-fire { width: 86px; height: 86px; right: calc(24px + env(safe-area-inset-right, 0px)); bottom: calc(28px + env(safe-area-inset-bottom, 0px)); background: rgba(255,107,139,0.85); color: #fff; }
+.tb-jump { width: 66px; height: 66px; right: calc(132px + env(safe-area-inset-right, 0px)); bottom: calc(26px + env(safe-area-inset-bottom, 0px)); background: rgba(63,224,184,0.88); }
+.tb-slide, .tb-swim { width: 56px; height: 56px; right: calc(108px + env(safe-area-inset-right, 0px)); bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
+.tb-reload { width: 48px; height: 48px; right: calc(42px + env(safe-area-inset-right, 0px)); bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+.tb-ability { width: 58px; height: 58px; right: calc(216px + env(safe-area-inset-right, 0px)); bottom: calc(60px + env(safe-area-inset-bottom, 0px)); background: rgba(255,210,63,0.92); }
+.tb-gadget { width: 52px; height: 52px; right: calc(186px + env(safe-area-inset-right, 0px)); bottom: calc(146px + env(safe-area-inset-bottom, 0px)); background: rgba(143,107,255,0.88); color: #fff; }
+.tb-swap { width: 48px; height: 48px; right: calc(118px + env(safe-area-inset-right, 0px)); bottom: calc(200px + env(safe-area-inset-bottom, 0px)); }
+.tb-interact { width: 72px; height: 72px; right: 40%; bottom: calc(24% + env(safe-area-inset-bottom, 0px)); background: rgba(255,210,63,0.96); animation: pulse 1.1s ease-in-out infinite; }
+.tb-pause { width: 46px; height: 46px; left: calc(14px + env(safe-area-inset-left, 0px)); top: calc(12px + env(safe-area-inset-top, 0px)); }
+.tb-ping { width: 44px; height: 44px; right: calc(150px + env(safe-area-inset-right, 0px)); top: calc(14px + env(safe-area-inset-top, 0px)); }
+.tb-boost { width: 96px; height: 96px; right: calc(28px + env(safe-area-inset-right, 0px)); bottom: calc(32px + env(safe-area-inset-bottom, 0px)); background: rgba(255,210,63,0.92); }
+.tb-brake { width: 68px; height: 68px; right: calc(146px + env(safe-area-inset-right, 0px)); bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
+.tb-item { width: 64px; height: 64px; right: calc(56px + env(safe-area-inset-right, 0px)); bottom: calc(150px + env(safe-area-inset-bottom, 0px)); background: rgba(143,107,255,0.88); color: #fff; }
+#touch[data-layout="race"] .tb-fire { width: 72px; height: 72px; right: calc(5% + env(safe-area-inset-right, 0px)); bottom: calc(50% - 36px); }
+#touch[data-layout="hub"] .tb-fire { width: 66px; height: 66px; bottom: calc(118px + env(safe-area-inset-bottom, 0px)); right: calc(30px + env(safe-area-inset-right, 0px)); }
+#touch[data-layout="hub"] .tb-jump { right: calc(30px + env(safe-area-inset-right, 0px)); bottom: calc(30px + env(safe-area-inset-bottom, 0px)); }
+#touch[data-layout="turf"] .tb-swim { width: 66px; height: 66px; right: calc(112px + env(safe-area-inset-right, 0px)); bottom: calc(110px + env(safe-area-inset-bottom, 0px)); background: rgba(61,123,255,0.85); color: #fff; }
+/* (individual `scale` so the pulse composes with the press squash on `transform`) */
+@keyframes pulse { 0%,100% { scale: 1; } 50% { scale: 1.08; } }
+/* Controls pop in when gameplay input comes back (#touch.active) and whenever a contextual button
+   appears (display none -> shown restarts it). Scale only: the player's button opacity is inline,
+   and :where() keeps mode/tutorial animations (e.g. .tbtn.tut-pulse) stronger than this default. */
+:where(#touch.active) .tbtn { animation: tbIn 0.34s var(--ease-out) backwards; }
+:where(#touch.active) .tb-interact { animation: tbIn 0.34s var(--ease-out) backwards, pulse 1.1s 0.34s ease-in-out infinite; }
+@keyframes tbIn { 0% { scale: 0.55; } 60% { scale: 1.08; } 100% { scale: 1; } }
+
+/* ---------- Generic UI ---------- */
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: calc(14px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) calc(16px + env(safe-area-inset-left, 0px));
+  overflow: hidden; }
+.screen.dim { background: rgba(20, 16, 60, 0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.panel { box-sizing: border-box; background: var(--panel); border: var(--outline); border-radius: var(--radius); box-shadow: 0 6px 0 var(--shadow), 0 18px 40px rgba(20,16,60,0.25);
+  padding: 16px; max-width: min(980px, 100%); width: 100%; max-height: 100%; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.panel.narrow { max-width: 460px; }
+.panel-head { display: flex; align-items: center; gap: 10px; }
+.panel-head h2 { font: var(--fw-d) clamp(20px, 3.6cqw, 30px)/1.1 var(--f-display); margin: 0; flex: 1; text-wrap: balance; letter-spacing: 0.01em; }
+.panel-body { overflow-y: auto; overflow-x: hidden; min-height: 0; flex: 1; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding-right: 4px; }
+.panel-body::-webkit-scrollbar { width: 8px; } .panel-body::-webkit-scrollbar-thumb { background: var(--ink-soft); border-radius: 8px; }
+/* Tactile buttons: press = push down + squash (fast), release = spring back with overshoot.
+   `.pressed` is set by 07_ui.js from pointer events (iOS gives no reliable :active on touch, and a
+   drag that turns into a scroll must release it); :active is kept for mouse/keyboard only. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 10px 18px; border-radius: 14px; border: var(--outline);
+  background: #fff; color: var(--ink); font: 800 16px/1.1 var(--f-body); box-shadow: 0 4px 0 var(--ink); cursor: pointer; text-align: center;
+  transition: transform 0.34s var(--ease-bouncy), box-shadow 0.22s var(--ease-out), filter 0.15s; }
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 5px 0 var(--ink); filter: brightness(1.05) saturate(1.06); }
+  .btn:active { transform: translateY(3px) scale(0.95); box-shadow: 0 1px 0 var(--ink); transition-duration: 0.06s; }
+}
+.btn.pressed { transform: translateY(3px) scale(0.95); box-shadow: 0 1px 0 var(--ink); transition-duration: 0.06s; filter: brightness(0.97); }
+.btn:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+/* One focus ring for every pressable surface (keyboard / switch access). */
+:is(.tab, .card.clickable, .toggle, .mm-tab, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-subtab, .mm-wchip, .mm-card.clickable, .mm-slot, .mm-socket, .mm-quickbtn, .mm-sugchip):focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+/* Other pressables squash with the independent `scale` property, so states that already use
+   `transform` (.mm-tab.on, .mm-preset.on, ...) keep their pose while pressed. */
+:where(.tab, .card.clickable, .mm-tab, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-subtab, .mm-wchip, .mm-card.clickable, .mm-slot, .mm-socket, .mm-quickbtn, .mm-sugchip, .mm-day) { transition: scale 0.34s var(--ease-bouncy), transform 0.3s var(--ease-spring); }
+:where(.tab, .card.clickable, .mm-tab, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-subtab, .mm-wchip, .mm-card.clickable, .mm-slot, .mm-socket, .mm-quickbtn, .mm-sugchip).pressed { scale: 0.96; transition-duration: 0.06s; }
+@media (hover: hover) and (pointer: fine) {
+  :where(.card.clickable, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-wchip, .mm-card.clickable, .mm-slot):hover { scale: 1.015; }
+  :where(.card.clickable, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-wchip, .mm-card.clickable, .mm-slot):active { scale: 0.97; transition-duration: 0.06s; }
+}
+.btn.primary { background: var(--sun); }
+.btn.go { background: var(--mint); }
+/* coloured buttons: fills deep enough that their white bold labels (with the ink drop shadow) stay readable: 3.7-4.5:1 */
+.btn.hot { background: var(--coral-deep); color: #fff; text-shadow: 0 2px 0 rgba(30,26,77,0.45); }
+.btn.cool { background: var(--sky-deep); color: #fff; text-shadow: 0 2px 0 rgba(30,26,77,0.45); }
+.btn.grape { background: var(--grape-deep); color: #fff; text-shadow: 0 2px 0 rgba(30,26,77,0.45); }
+.btn.small { min-height: 38px; padding: 6px 12px; font-size: 14px; border-radius: 11px; }
+.btn.icon { width: 46px; height: 46px; min-height: 0; padding: 0; border-radius: 50%; flex: none; }
+.btn.big { min-height: 64px; font-size: 20px; padding: 12px 26px; border-radius: 18px; }
+.btn[disabled], .btn.disabled { opacity: 0.45; filter: grayscale(0.6); pointer-events: none; }
+.btn svg { width: 22px; height: 22px; flex: none; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.row.end { justify-content: flex-end; } .row.center { justify-content: center; } .row.between { justify-content: space-between; }
+.col { display: flex; flex-direction: column; gap: 10px; }
+.grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(210px, 100%), 1fr)); }
+.grid.tight { grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); }
+.card { background: #fff; border: var(--outline); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 0 var(--shadow); min-width: 0; position: relative; }
+.card.clickable { cursor: pointer; }
+.card.clickable:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--shadow); }
+.card.sel { outline: 4px solid var(--sun); outline-offset: 1px; }
+.card.locked { opacity: 0.6; }
+.card h3 { margin: 0; font: 800 16px/1.2 var(--f-body); }
+.card p { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink-soft); }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font: 800 12px/1.4 var(--f-body); border: 2px solid var(--ink); background: var(--panel-2); letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+.rar-common { --rc: var(--r-common); } .rar-uncommon { --rc: var(--r-uncommon); } .rar-prismatic { --rc: #ff7ad9; } .rar-rare { --rc: var(--r-rare); } .rar-epic { --rc: var(--r-epic); } .rar-legendary { --rc: var(--r-legend); } .rar-mythic { --rc: var(--r-mythic); }
+.card[class*="rar-"] { border-color: var(--ink); box-shadow: 0 4px 0 var(--rc, var(--shadow)); }
+.tag[class*="rar-"] { background: var(--rc); }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { padding: 8px 14px; border-radius: 12px; border: var(--outline); background: #fff; font: 800 14px var(--f-body); cursor: pointer; box-shadow: 0 3px 0 var(--ink); color: var(--ink); }
+/* selected = sunny yellow with ink text everywhere (settings tabs, segmented choices, sub-tabs, the town rail): 11:1 */
+.tab.on { background: var(--sun); color: var(--ink); text-shadow: none; }
+.stat { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.stat b { font-variant-numeric: tabular-nums; }
+.bar { height: 10px; border-radius: 99px; background: rgba(30,26,77,0.15); border: 2px solid var(--ink); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--mint); border-radius: 99px; }
+.money { display: inline-flex; align-items: center; gap: 6px; font: 800 16px var(--f-body); font-variant-numeric: tabular-nums; }
+.coin { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff6b0, #ffc928 55%, #e09a00); border: 2px solid var(--ink); display: inline-block; flex: none; }
+.part-ico { width: 30px; height: 30px; border-radius: 9px; border: 2px solid var(--ink); display: inline-grid; place-items: center; flex: none; background: #fff; }
+.part-ico svg { width: 22px; height: 22px; }
+.muted { color: var(--ink-soft); }
+.small { font-size: 12px; }
+.center { text-align: center; }
+.hr { height: 3px; background: var(--ink); opacity: 0.12; border-radius: 3px; }
+select.sel, input[type=range] { font: 700 15px var(--f-body); }
+select.sel { min-height: 44px; border: var(--outline); border-radius: 12px; padding: 6px 10px; background: #fff; color: var(--ink); }
+input[type=range] { width: 100%; accent-color: var(--grape); min-height: 32px; }
+.setting { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 10px; align-items: center; padding: 8px 0; border-bottom: 2px dashed rgba(30,26,77,0.12); }
+.toggle { width: 60px; height: 34px; border-radius: 99px; border: var(--outline); background: #d7dbe6; position: relative; cursor: pointer; justify-self: start; }
+.toggle { transition: background-color 0.18s var(--ease-out); }
+.toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); transition: transform 0.32s var(--ease-bouncy); }
+.toggle.on { background: var(--mint); } .toggle.on::after { transform: translateX(26px); }
+.toggle.pressed::after { scale: 1.12 0.9; }
+
+/* ---------- Toasts / banner / loading ---------- */
+#toasts { position: absolute; left: 50%; top: calc(128px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; width: min(calc(var(--gw, 100cqw) * 0.92), 520px); }
+.toast { background: var(--panel); border: var(--outline); border-radius: 14px; padding: 8px 14px; font: 800 calc(14px * var(--ui-t))/1.3 var(--f-body); box-shadow: 0 4px 0 var(--shadow);
+  display: flex; gap: 8px; align-items: center; animation: toastIn 0.25s cubic-bezier(.2,1.6,.4,1); max-width: 100%; }
+.toast.out { animation: toastOut 0.3s forwards; }
+/* In-play lane (placed by UI.toast under the top-centre HUD, clear of the crosshair). */
+#toasts.play { gap: 4px; }
+#toasts.play .toast { padding: 4px 10px; font-size: max(12px, calc(12.5px * var(--ui-t))); border-width: 2.5px; border-radius: 11px; box-shadow: 0 3px 0 var(--shadow); text-align: center; }
+#toasts.play .toast > span:first-child:not(:last-child) { width: 18px !important; height: 18px !important; flex: none; }
+@keyframes toastIn { from { transform: translateY(-14px) scale(0.9); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes toastOut { to { transform: translateY(-10px); opacity: 0; } }
+/* Toasts: spring in (overshoot then settle), ease out; neighbours glide into place (FLIP in 07_ui.js). */
+#toasts .toast { animation: toastPop 0.34s var(--ease-out) backwards; }
+#toasts .toast.out { animation: toastLeave 0.24s var(--ease-in) forwards; }
+#ui.ui-menu #toasts .toast.out { animation-name: toastLeaveDown; }
+@keyframes toastPop { 0% { transform: translateY(-12px) scale(0.86); opacity: 0; } 55% { transform: translateY(1px) scale(1.03); opacity: 1; } 78% { transform: scale(0.99); } 100% { transform: none; opacity: 1; } }
+@keyframes toastLeave { to { transform: translateY(-8px) scale(0.94); opacity: 0; } }
+@keyframes toastLeaveDown { to { transform: translateY(8px) scale(0.94); opacity: 0; } }
+#banner { position: absolute; left: 0; right: 0; top: 30%; text-align: center; pointer-events: none; }
+#banner .b-title { font: var(--fw-d) clamp(24px, min(7cqw, 11cqh), 66px)/1.05 var(--f-display); max-width: 92%; margin: 0 auto; text-wrap: balance; color: #fff; -webkit-text-stroke: max(1px, calc(3px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 6px 0 var(--ink); animation: bannerPop 0.5s var(--ease-out) backwards; letter-spacing: 0.02em; }
+#banner .b-sub { margin-top: 10px; font: 800 clamp(15px, 3cqw, 22px) var(--f-body); color: #fff; text-shadow: 0 2px 0 var(--ink), 0 0 8px rgba(30,26,77,0.6); animation: bannerSub 0.36s 0.16s var(--ease-out) backwards; }
+@keyframes bannerIn { from { transform: scale(1.8); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes bannerPop { 0% { transform: scale(1.75); opacity: 0; } 45% { transform: scale(0.94); opacity: 1; } 70% { transform: scale(1.03); } 100% { transform: none; opacity: 1; } }
+@keyframes bannerSub { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+/* banner exit: logically hidden at once ([hidden] set by UI.banner), drawn for one more short beat */
+#banner.b-out[hidden] { display: block !important; animation: bannerOut 0.24s var(--ease-in) forwards; }
+@keyframes bannerOut { to { transform: translateY(-14px) scale(1.06); opacity: 0; } }
+/* Loading: cross-fades in/out over the scene. #loading[hidden] is the logical state (tests and code
+   read it); .ld-out keeps it drawn while it fades away, without catching taps. */
+#loading { position: absolute; inset: 0; background: linear-gradient(180deg, #2b7fe0, #63b9f5 55%, #8fd8ff); display: grid; place-items: center; pointer-events: auto; z-index: 20; overflow: hidden; }
+#loading:not([hidden]) { animation: ldIn 0.16s var(--ease-out) backwards; }
+#loading.ld-now:not([hidden]) { animation: none; }
+#loading.ld-out[hidden] { display: grid !important; pointer-events: none; animation: ldOut 0.3s var(--ease-in) forwards; }
+#loading.ld-out .ld-inner { animation: ldInnerOut 0.3s var(--ease-in) forwards; }
+@keyframes ldIn { from { opacity: 0; } }
+@keyframes ldOut { to { opacity: 0; } }
+@keyframes ldInnerOut { to { transform: scale(1.06); opacity: 0; } }
+/* soft drifting light blobs (two pseudo layers, transform-only) */
+#loading::before, #loading::after { content: ''; position: absolute; border-radius: 50%; pointer-events: none; }
+#loading::before { width: 70%; aspect-ratio: 1; left: -18%; top: -30%; background: radial-gradient(circle, rgba(255,255,255,0.28), rgba(255,255,255,0) 65%); animation: ldDrift 7s ease-in-out infinite alternate; }
+#loading::after { width: 60%; aspect-ratio: 1; right: -16%; bottom: -34%; background: radial-gradient(circle, rgba(255,246,190,0.34), rgba(255,246,190,0) 65%); animation: ldDrift 8.5s ease-in-out -3s infinite alternate-reverse; }
+@keyframes ldDrift { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(6%, 8%, 0) scale(1.12); } }
+.ld-inner { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 16px; text-align: center; position: relative; z-index: 1; }
+#loading:not([hidden]):not(.ld-now) .ld-inner { animation: ldInnerIn 0.42s 0.04s var(--ease-out) backwards; }
+@keyframes ldInnerIn { 0% { transform: translateY(12px) scale(0.94); opacity: 0; } 60% { transform: translateY(-2px) scale(1.01); opacity: 1; } 100% { transform: none; opacity: 1; } }
+.ld-stage { position: relative; width: 96px; height: 104px; display: grid; justify-items: center; align-items: end; }
+.ld-orb { width: 74px; height: 74px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--mint) 45%, #17a88a); border: 4px solid var(--ink); box-shadow: 0 6px 0 var(--ink); animation: bounce 0.7s ease-in-out infinite alternate; }
+.ld-stage .ld-orb { position: relative; z-index: 1; margin-bottom: 10px; animation: ldHop 0.9s infinite; transform-origin: 50% 100%; }
+.ld-shadow { position: absolute; bottom: 0; left: 50%; width: 62px; height: 12px; margin-left: -31px; border-radius: 50%; background: rgba(30,26,77,0.28); animation: ldShadow 0.9s infinite; }
+@keyframes bounce { from { transform: translateY(0) scale(1.05, 0.95); } to { transform: translateY(-22px) scale(0.95, 1.05); } }
+/* squash on landing, stretch on take-off, hang at the top */
+@keyframes ldHop {
+  0% { transform: translateY(0) scale(1.14, 0.84); animation-timing-function: cubic-bezier(.2,.7,.4,1); }
+  12% { transform: translateY(-6px) scale(0.92, 1.1); animation-timing-function: cubic-bezier(.2,.7,.4,1); }
+  50% { transform: translateY(-30px) scale(1, 1); animation-timing-function: cubic-bezier(.6,0,.8,.4); }
+  92% { transform: translateY(-2px) scale(0.96, 1.05); animation-timing-function: ease-out; }
+  100% { transform: translateY(0) scale(1.14, 0.84); }
+}
+@keyframes ldShadow { 0%, 100% { transform: scale(1.1); opacity: 1; } 50% { transform: scale(0.6); opacity: 0.45; } }
+.ld-text { font: var(--fw-d) 24px var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(2px * var(--ds, 1))) var(--ink); paint-order: stroke fill; display: flex; align-items: baseline; gap: 2px; }
+.ld-dots { display: inline-flex; gap: 3px; margin-left: 4px; }
+.ld-dots i { width: 7px; height: 7px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); animation: ldDot 1s ease-in-out infinite; }
+.ld-dots i:nth-child(2) { animation-delay: 0.15s; } .ld-dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes ldDot { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+.ld-tip { font: 700 14px/1.5 var(--f-body); color: #fff; max-width: 420px; text-shadow: 0 2px 0 rgba(30,26,77,0.6); }
+.ld-tip:not(:empty) { background: rgba(30,26,77,0.22); border-radius: 14px; padding: 6px 14px; }
+#fatal { position: absolute; inset: 0; background: #1e1a4d; color: #fff; display: grid; place-items: center; padding: 24px; text-align: center; font: 700 16px/1.6 var(--f-body); pointer-events: auto; z-index: 30; }
+
+/* ---------- HUD ---------- */
+#hud { position: absolute; inset: 0; pointer-events: none; font-family: var(--f-body); }
+/* opacity-only entrance (no translate: 07c measures HUD rects right away to place the buttons) */
+#hud:not([hidden]) { animation: hudIn 0.4s var(--ease-out) backwards; }
+@keyframes hudIn { from { opacity: 0; } }
+/* left edge follows the pause button (12 px inset + 46 px × button scale + border) so they never touch */
+.hud-tl { position: absolute; left: calc(max(12px, env(safe-area-inset-left, 0px) + 12px) + 14px + 46px * var(--ui-u, 1)); top: calc(12px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 6px; max-width: calc(var(--gw, 100cqw) * 0.26); min-width: 150px; }
+/* (08_hud fitColumns, only while the column would run into the weapon block: wider first, then a one-line title) */
+.hud-tl.tl-wide { max-width: calc(var(--gw, 100cqw) * 0.34); }
+.hud-tl.tl-tight .objective .ob-t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud-tc { position: absolute; left: 50%; transform: translateX(-50%); top: calc(8px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.hud-tr { position: absolute; right: calc(12px + env(safe-area-inset-right, 0px)); top: calc(10px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.hud-bl { position: absolute; left: calc(14px + env(safe-area-inset-left, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 6px; }
+.hud-bc { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 6px; align-items: flex-end; }
+.hud-chip { background: rgba(255,255,255,0.86); border: 3px solid var(--ink); border-radius: 12px; padding: 4px 10px; font: 800 max(14px, calc(14px * var(--ui-t)))/1.3 var(--f-body); box-shadow: 0 3px 0 var(--shadow); font-variant-numeric: tabular-nums; display: flex; gap: 6px; align-items: center; }
+.hud-chip.big { font: var(--fw-d) calc(22px * var(--ui-t))/1.1 var(--f-display); padding: 4px 14px; position: relative; }
+.hud-chip b, .hud-chip.big > span { display: inline-block; }
+/* timer: red while warned; a countdown running short (.urgent) adds a heartbeat on every second and a
+   pulsing ring (08_hud alternates .ta/.tb to restart the beat without a reflow); the ring is a pseudo
+   layer so the chip's own box never moves */
+.hud-chip.big.warn { color: #ff4d5e; }
+.hud-chip.big.warn.urgent::after { content: ''; position: absolute; inset: -3px; border-radius: 14px; box-shadow: 0 0 0 3px rgba(255,77,94,0.7), 0 0 14px rgba(255,77,94,0.6); animation: warnRing 1s ease-out infinite; pointer-events: none; }
+.hud-chip.big > span.ta { animation: tmBeatA 0.42s var(--ease-out); } .hud-chip.big > span.tb { animation: tmBeatB 0.42s var(--ease-out); }
+@keyframes tmBeatA { 0% { scale: 1.3; } 100% { scale: 1; } } @keyframes tmBeatB { 0% { scale: 1.3; } 100% { scale: 1; } }
+@keyframes warnRing { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.18, 1.3); } }
+.vitals { display: flex; flex-direction: column; gap: 4px; width: min(220px, calc(var(--gw, 100cqw) * 0.26)); min-width: 150px; }
+.vbar { height: calc(15px * var(--ui-t)); border-radius: 99px; border: 3px solid var(--ink); background: rgba(30,26,77,0.35); overflow: hidden; position: relative; box-shadow: 0 3px 0 var(--shadow); }
+/* fill (i) and damage trail (s) are scaled by 08_hud.js each frame they change: the fill drops at once,
+   the pale trail waits a beat and then drains; heals rise smoothly. */
+.vbar > i { position: absolute; inset: 0; transform-origin: left; background: linear-gradient(180deg, #7dffb1, #22c46b); }
+.vbar > s { position: absolute; inset: 0; transform-origin: left; background: linear-gradient(180deg, #fffbe0, #ffd98a); text-decoration: none; }
+.vbar.sh > s { background: linear-gradient(180deg, #ffffff, #c9efff); }
+.vbar::after { content: ''; position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.vbar.fa::after { animation: vbFlashA 0.28s ease-out; } .vbar.fb::after { animation: vbFlashB 0.28s ease-out; }
+@keyframes vbFlashA { 0% { opacity: 0.55; } 100% { opacity: 0; } } @keyframes vbFlashB { 0% { opacity: 0.55; } 100% { opacity: 0; } }
+.vbar.sh > i { background: linear-gradient(180deg, #a6e6ff, #2fa7ff); }
+.vbar.sh.t2 > i { background: linear-gradient(180deg, #d9b3ff, #9a55ff); } .vbar.sh.t3 > i { background: linear-gradient(180deg, #ffe39a, #ffae1a); }
+.vbar > b { position: absolute; inset: 0; display: grid; place-items: center; font: 800 max(11px, calc(11px * var(--ui-t)))/1 var(--f-body); color: #fff; text-shadow: 0 1px 0 var(--ink); }
+.vbar.low > i { background: linear-gradient(180deg, #ff9aa6, #ff3352); animation: blink 0.6s infinite alternate; }
+@keyframes blink { to { opacity: 0.55; } }
+.ammo { font: var(--fw-d) calc(30px * var(--ui-t))/1 var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(2.5px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); text-align: right; }
+.ammo small { font-size: calc(16px * var(--ui-t)); }
+.ammo .low { color: var(--coral); }
+.ammo .heat { display: inline-block; vertical-align: middle; width: 58px; height: 14px; margin: -4px 0 0 6px; border: 3px solid var(--ink); border-radius: 99px; background: rgba(30,26,77,0.35); overflow: hidden; box-shadow: 0 3px 0 var(--ink); }
+.ammo .heat b { display: block; height: 100%; background: linear-gradient(180deg, #ffe58a, #ffb627); border-radius: 99px; transition: width 0.1s; }
+.ammo .heat.warm b { background: linear-gradient(180deg, #ffb08a, #ff6b3d); }
+.ammo .heat.hot b { background: linear-gradient(180deg, #ff9aa6, #ff3352); animation: blink 0.3s infinite alternate; }
+#hud.touch .hud-bc { flex-direction: column-reverse; align-items: center; gap: 4px; }
+#hud.touch .ammo { font-size: calc(24px * var(--ui-t)); line-height: 1; } #hud.touch .ammo small { font-size: max(12px, calc(14px * var(--ui-t))); }
+.wslots { display: flex; gap: calc(var(--slot-px, 44px) * 0.12); pointer-events: auto; }
+/* --slot-px follows the touch-button scale (08_hud layoutVars): 44 px on a 844x390 phone */
+.wslot { box-sizing: border-box; width: var(--slot-px, 44px); height: var(--slot-px, 44px); border-radius: 12px; border: 3px solid var(--ink); background: rgba(255,255,255,0.75); display: grid; place-items: center; position: relative; box-shadow: 0 3px 0 var(--shadow);
+  transition: transform 0.3s var(--ease-bouncy), background-color 0.16s, box-shadow 0.2s; }
+.wslot.on { background: var(--sun); transform: translateY(-4px); box-shadow: 0 5px 0 var(--shadow), 0 0 0 3px rgba(255,210,63,0.45); }
+.wslot svg { width: calc(var(--slot-px, 44px) * 0.76); height: calc(var(--slot-px, 44px) * 0.76); }
+.wslot .lv { position: absolute; right: -4px; bottom: -6px; font: 800 11px/1.1 var(--f-body); background: var(--ink); color: #fff; padding: 1px 4px; border-radius: 6px; }
+.wslot .xp { position: absolute; left: 4px; right: 4px; bottom: 3px; height: 3px; background: rgba(30,26,77,0.2); border-radius: 2px; overflow: hidden; }
+.wslot .xp > i { display: block; height: 100%; background: var(--grape); }
+/* Crosshair (08_hud.js writes the tick offsets / ring size: damped spread from the camera FOV + hit kick).
+   Player options (Settings → Graphics): style .xh-classic / .xh-dot / .xh-circle, colour --xh-c (always on a
+   dark ink outline), size --xh-k, opacity (inline). On a target it turns --xh-on and goes hollow so a small
+   robot shows through: classic drops the dot and thins the ticks, dot becomes a ring, circle drops its dot. */
+.crosshair { --xh-c: #fff; --xh-on: var(--coral); --xh-k: 1; position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+.crosshair i { position: absolute; background: var(--xh-c); box-shadow: 0 0 0 2px var(--ink); border-radius: 2px; transition: background-color 0.1s; }
+.crosshair .c-dot { width: calc(4px * var(--xh-k)); height: calc(4px * var(--xh-k)); left: calc(-2px * var(--xh-k)); top: calc(-2px * var(--xh-k)); border-radius: 50%; }
+.crosshair .c-l, .crosshair .c-r { width: calc(9px * var(--xh-k)); height: calc(3px * var(--xh-k)); top: calc(-1.5px * var(--xh-k)); }
+.crosshair .c-t, .crosshair .c-b { width: calc(3px * var(--xh-k)); height: calc(9px * var(--xh-k)); left: calc(-1.5px * var(--xh-k)); }
+.crosshair .c-ring { display: none; left: 0; top: 0; width: 20px; height: 20px; background: transparent; border-radius: 50%;
+  box-sizing: border-box; border: calc(2px * var(--xh-k)) solid var(--xh-c); box-shadow: 0 0 0 1.5px var(--ink), inset 0 0 0 1.5px var(--ink); transition: border-color 0.1s; }
+.crosshair.on-target i { background: var(--xh-on); }
+.crosshair.on-target .c-ring { background: transparent; border-color: var(--xh-on); }
+.crosshair.xh-classic.on-target .c-dot { opacity: 0; }
+.crosshair.xh-classic.on-target .c-l, .crosshair.xh-classic.on-target .c-r { height: calc(2px * var(--xh-k)); top: calc(-1px * var(--xh-k)); box-shadow: 0 0 0 1.5px var(--ink); }
+.crosshair.xh-classic.on-target .c-t, .crosshair.xh-classic.on-target .c-b { width: calc(2px * var(--xh-k)); left: calc(-1px * var(--xh-k)); box-shadow: 0 0 0 1.5px var(--ink); }
+.crosshair.xh-dot .c-l, .crosshair.xh-dot .c-r, .crosshair.xh-dot .c-t, .crosshair.xh-dot .c-b,
+.crosshair.xh-circle .c-l, .crosshair.xh-circle .c-r, .crosshair.xh-circle .c-t, .crosshair.xh-circle .c-b { display: none; }
+.crosshair.xh-dot .c-dot { width: calc(7px * var(--xh-k)); height: calc(7px * var(--xh-k)); left: calc(-3.5px * var(--xh-k)); top: calc(-3.5px * var(--xh-k)); }
+.crosshair.xh-dot.on-target .c-dot { width: calc(10px * var(--xh-k)); height: calc(10px * var(--xh-k)); left: calc(-5px * var(--xh-k)); top: calc(-5px * var(--xh-k));
+  background: transparent; border: calc(2px * var(--xh-k)) solid var(--xh-on); box-sizing: border-box; box-shadow: 0 0 0 1.5px var(--ink), inset 0 0 0 1.5px var(--ink); }
+.crosshair.xh-circle .c-ring { display: block; }
+.crosshair.xh-circle .c-dot { width: calc(3px * var(--xh-k)); height: calc(3px * var(--xh-k)); left: calc(-1.5px * var(--xh-k)); top: calc(-1.5px * var(--xh-k)); }
+.crosshair.xh-circle.on-target .c-dot { opacity: 0; }
+/* settings preview (07b): the same crosshair over a little sky-and-grass swatch */
+.xh-prev { position: relative; width: 120px; height: 70px; border-radius: 12px; border: var(--outline); overflow: hidden; flex: none;
+  background: linear-gradient(180deg, #8fd8ff 0%, #c9efff 55%, #8ee07a 56%, #5fc45a 100%); }
+.xh-prev .crosshair { pointer-events: none; }
+/* hit marker: played with element.animate() by 08_hud.js (no reflow per hit) */
+.hitmark { position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; opacity: 0; }
+.hitmark svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.hitmark.kill path { stroke: var(--coral); stroke-width: 4.5; }
+@keyframes hitm { 0% { opacity: 1; transform: scale(1.4); } 100% { opacity: 0; transform: scale(1); } }
+.vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 55%, rgba(255,40,70,0.55)); opacity: 0; }
+/* damage direction: arcs that keep pointing at the attacker as you turn (rotation updated per frame) */
+.dmgdir { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+.dmgdir i { position: absolute; left: -60px; top: -168px; width: 120px; height: 38px; background: radial-gradient(ellipse 50% 100% at 50% 100%, rgba(255,235,240,0.95) 0%, rgba(255,64,92,0.92) 22%, rgba(255,64,92,0.35) 55%, transparent 72%); border-radius: 50% 50% 0 0; transform-origin: 60px 168px; opacity: 0; }
+/* GDD §6 minimum HUD text 14 px: the objective text is 15 px at M (it was 13 px), never under 14 px */
+.objective { position: relative; isolation: isolate; background: rgba(255,255,255,0.88); border: 3px solid var(--ink); border-radius: 12px; padding: calc(5px * var(--ui-t)) 10px; font: 800 max(14px, calc(15px * var(--ui-t)))/1.3 var(--f-body); box-shadow: 0 3px 0 var(--shadow); }
+.objective .ob-t { font: var(--fw-d) max(14px, calc(14px * var(--ui-t)))/1.2 var(--f-display); letter-spacing: 0.03em; color: var(--grape-ink); }
+.objective .bar { margin-top: 4px; height: 8px; position: relative; }
+/* progress fill slides (transform) instead of resizing; turns gold when complete */
+.objective .bar > i { width: 100%; transform: translateX(-100%); transition: transform 0.45s var(--ease-out); }
+.objective .bar.done > i { background: linear-gradient(180deg, #ffe58a, #ffb627); }
+/* objective changed: a sunny flash behind the text and a ring that swells out (pseudo layers only) */
+.objective::before { content: ''; position: absolute; inset: 0; border-radius: 9px; background: #fff3a6; opacity: 0; z-index: -1; pointer-events: none; }
+.objective::after { content: ''; position: absolute; inset: -3px; border-radius: 13px; border: 3px solid var(--sun); opacity: 0; pointer-events: none; }
+.objective.pa::before { animation: obFlashA 0.9s ease-out; } .objective.pb::before { animation: obFlashB 0.9s ease-out; }
+.objective.pa::after { animation: obRingA 0.7s var(--ease-out); } .objective.pb::after { animation: obRingB 0.7s var(--ease-out); }
+.objective.tick.pa::before, .objective.tick.pb::before { animation: none; }
+@keyframes obFlashA { 0%, 25% { opacity: 1; } 100% { opacity: 0; } } @keyframes obFlashB { 0%, 25% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes obRingA { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.06, 1.18); } }
+@keyframes obRingB { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.06, 1.18); } }
+/* kill feed slides in from the right edge, pickups from the left; .out = leaving (then removed) */
+.feed { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+.feed div { background: rgba(30,26,77,0.72); color: #fff; padding: 3px 10px; border-radius: 10px; font: 800 max(12px, calc(13px * var(--ui-t))) var(--f-body); animation: feedIn 0.3s var(--ease-out) backwards; }
+.feed div.out { animation: feedOut 0.22s var(--ease-in) forwards; }
+@keyframes feedIn { 0% { transform: translateX(28px) scale(0.9); opacity: 0; } 60% { transform: translateX(-2px) scale(1.02); opacity: 1; } 100% { transform: none; opacity: 1; } }
+@keyframes feedOut { to { transform: translateX(22px); opacity: 0; } }
+.pickfeed { position: absolute; left: calc(14px + env(safe-area-inset-left, 0px)); top: 38%; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; align-items: flex-start;
+  overflow: hidden; padding: 2px 8px; margin: -2px -8px; }
+.pickfeed div { background: rgba(255,255,255,0.88); border: 2px solid var(--ink); padding: 3px 10px; border-radius: 10px; font: 800 max(12px, calc(13px * var(--ui-t))) var(--f-body); display: flex; align-items: center; gap: 6px; animation: pickIn 0.3s var(--ease-out) backwards; }
+.pickfeed div.out { animation: pickOut 0.22s var(--ease-in) forwards; }
+/* 08_hud fitColumns sets the top (under the top-left column) and, left-handed on touch, moves the feed to the stick
+   side on the right (it slides in from that edge, like the kill feed) */
+.pickfeed.right { left: auto; right: calc(14px + env(safe-area-inset-right, 0px)); align-items: flex-end; }
+.pickfeed div { max-width: 100%; box-sizing: border-box; } .pickfeed div > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pickfeed.right div { animation-name: feedIn; } .pickfeed.right div.out { animation-name: feedOut; }
+@keyframes pickIn { 0% { transform: translateX(-26px) scale(0.9); opacity: 0; } 60% { transform: translateX(2px) scale(1.03); opacity: 1; } 100% { transform: none; opacity: 1; } }
+@keyframes pickOut { to { transform: translateX(-20px); opacity: 0; } }
+.minimap { width: var(--mm-px, 120px); height: var(--mm-px, 120px); border-radius: 50%; border: 3px solid var(--ink); background: rgba(255,255,255,0.4); box-shadow: 0 3px 0 var(--shadow); overflow: hidden; }
+.minimap canvas { width: 100%; height: 100%; display: block; }
+.bossbar { width: min(420px, calc(var(--gw, 100cqw) * 0.3)); }
+.bossbar .bn { font: var(--fw-d) 16px var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(1.5px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-align: center; }
+.bossbar .vbar > i { background: linear-gradient(180deg, #ff9ab3, #ff3f6c); }
+.teambar { display: flex; width: min(380px, calc(var(--gw, 100cqw) * 0.4)); height: 22px; border: 3px solid var(--ink); border-radius: 99px; overflow: hidden; box-shadow: 0 3px 0 var(--shadow); background: #eee; }
+.teambar i { display: block; height: 100%; transition: width 0.3s; } .teambar .ta { background: var(--team-a); } .teambar .tb { background: var(--team-b); margin-left: auto; }
+.prompt { position: absolute; left: 50%; bottom: 32%; transform: translateX(-50%); background: rgba(255,255,255,0.92); border: 3px solid var(--ink); border-radius: 14px; padding: 6px 14px; font: 800 calc(15px * var(--ui-t)) var(--f-body); box-shadow: 0 4px 0 var(--shadow); white-space: nowrap;
+  animation: promptIn 0.3s var(--ease-out) backwards; transform-origin: 50% 100%; }
+@keyframes promptIn { 0% { scale: 0.7; opacity: 0; translate: 0 8px; } 60% { scale: 1.05; opacity: 1; translate: 0 -1px; } 100% { scale: 1; opacity: 1; translate: 0 0; } }
+.prompt kbd { background: var(--ink); color: #fff; border-radius: 6px; padding: 0 6px; margin-right: 6px; font: 800 calc(13px * var(--ui-t)) var(--f-body); }
+/* gamepad face-button glyph (A green, B red, X blue, Y yellow) for prompts and hints */
+.pad-g { display: inline-grid; place-items: center; width: 1.45em; height: 1.45em; border-radius: 50%; margin-right: 6px; vertical-align: -0.28em; font: 800 0.8em/1 var(--f-body); color: #fff; background: #3d7bff; box-shadow: 0 0 0 2px var(--ink); text-shadow: 0 1px 0 rgba(30,26,77,0.5); }
+.pad-g.a { background: #22c46b; } .pad-g.b { background: #ff4d5e; } .pad-g.y { background: #f2b600; }
+/* key / controller-button glyph on a HUD chip (08_hud: the hub's Map chip shows M, or the pad's View button) */
+.mm-key { display: inline-grid; place-items: center; min-width: 22px; height: 22px; box-sizing: border-box; padding: 0 5px; margin-left: 2px; border-radius: 7px; background: var(--ink); color: #fff; font: 800 13px/1 var(--f-body); box-shadow: 0 2px 0 rgba(30,26,77,0.3), inset 0 -2px 0 rgba(255,255,255,0.18); }
+.mm-key.pad { border-radius: 99px; padding: 0 6px; }
+/* (on the Map chip: 30_menus sizes every span of the chip as its 32 px icon box — not this one) */
+.mm-quickbtn .mm-key { display: inline-grid; width: auto; height: 22px; flex: none; }
+.mm-key svg { width: 18px; height: 13px; display: block; }
+.markers { position: absolute; inset: 0; overflow: hidden; isolation: isolate; }
+.marker { position: absolute; left: 0; top: 0; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; gap: 2px; font: 800 max(11px, calc(12px * var(--ui-t))) var(--f-body); color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px rgba(30,26,77,0.7); white-space: nowrap; will-change: transform; }
+.marker .mk { width: 26px; height: 26px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); border: 3px solid var(--ink); background: var(--sun); display: grid; place-items: center;
+  animation: mkIn 0.42s var(--ease-out) backwards; transition: background-color 0.2s;
+  /* glossy toy pin: a light band along the top-left of the bulb and a short drop shadow straight down (both offsets are
+     written in the pin's own frame, which is turned -45 deg) */
+  box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), -2px 2px 0 rgba(30,26,77,0.35); }
+@keyframes mkIn { 0% { scale: 0.2; opacity: 0; } 55% { scale: 1.2; opacity: 1; } 80% { scale: 0.95; } 100% { scale: 1; opacity: 1; } }
+.marker .mk > span { transform: rotate(45deg); font-size: 12px; color: var(--ink); text-shadow: none; }
+.marker.edge .mk { background: var(--coral); }
+/* label: a translucent ink pill ringed in the marker's own colour (--mc, set by 08_hud), so it reads over sky, signs
+   and other labels alike; the distance after the name in gold. 08_hud measures it (markerBox) for the avoidance. */
+.marker .ml { display: flex; align-items: baseline; gap: 5px; padding: 2px 9px 3px; border-radius: 99px; line-height: 1.2;
+  background: rgba(30,26,77,0.7); box-shadow: 0 0 0 2px var(--mc, var(--sun)), 0 3px 0 rgba(30,26,77,0.3); text-shadow: 0 1px 0 rgba(30,26,77,0.9); }
+.marker .ml .md { color: #ffe27a; font-size: max(11px, 0.92em); font-variant-numeric: tabular-nums; }
+.marker.edge .ml { box-shadow: 0 0 0 2px var(--coral), 0 3px 0 rgba(30,26,77,0.3); }
+/* a marker that has no clear place (under a HUD chip or a button cluster, or behind a nearer label: 08_hud markerAvoid)
+   keeps a faint pin and drops its label, so no text is ever read through other text */
+.marker { transition: opacity 0.18s var(--ease-out); }
+.marker.quiet .ml { visibility: hidden; }
+/* (and its faint pin goes behind the others: it used to poke through the pill of the label that pushed it out) */
+.marker.quiet { z-index: -1; }
+.dmgnum { position: absolute; left: 0; top: 0; font: var(--fw-d) calc(18px * var(--ui-t)) var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(2px * var(--ds, 1))) var(--ink); paint-order: stroke fill; pointer-events: none; will-change: transform, opacity; white-space: nowrap; text-shadow: 0 2px 0 var(--ink); }
+.dmgnum.off { display: none; }
+.dmgnum.crit { color: var(--sun); font-size: calc(24px * var(--ui-t)); } .dmgnum.sh { color: #8fd6ff; } .dmgnum.heal { color: #7dffb1; }
+.fps { position: absolute; left: calc(8px + env(safe-area-inset-left, 0px)); bottom: 2px; font: 700 11px monospace; color: #fff; text-shadow: 0 1px 0 #000; }
+.race-speed { font: var(--fw-d) 40px/1 var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(2.5px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); }
+.race-pos { font: var(--fw-d) 52px/1 var(--f-display); color: var(--sun); -webkit-text-stroke: max(1px, calc(3px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); }
+.countdown { position: absolute; inset: 0; display: grid; place-items: center; font: var(--fw-d) min(30cqw, 160px)/1 var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(5px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 8px 0 var(--ink); }
+
+/* ---------- Title / hub / results ---------- */
+.title-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+.logo { font: var(--fw-d) clamp(40px, 10cqw, 96px)/0.92 var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(5px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 8px 0 var(--ink), 0 14px 30px rgba(30,26,77,0.4); letter-spacing: 0.01em; transform: rotate(-3deg); }
+.logo .l2 { display: block; color: var(--sun); font-size: 0.62em; letter-spacing: 0.14em; margin-top: 6px; }
+.tagline { font: 800 clamp(14px, 2.6cqw, 18px)/1.4 var(--f-body); color: #fff; text-shadow: 0 2px 0 var(--ink); max-width: 560px; }
+.results-stars { display: flex; gap: 8px; justify-content: center; font-size: 44px; }
+.results-stars span { filter: drop-shadow(0 4px 0 var(--ink)); }
+.reward-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.reward { background: #fff; border: 3px solid var(--ink); border-radius: 12px; padding: 6px 10px; display: flex; gap: 6px; align-items: center; font: 800 14px var(--f-body); box-shadow: 0 3px 0 var(--shadow); animation: toastIn 0.4s backwards; }
+.npc-line { background: #fff; border: var(--outline); border-radius: 16px 16px 16px 4px; padding: 10px 14px; font: 700 14px/1.5 var(--f-body); position: relative; }
+.npc-name { font: var(--fw-d) 13px var(--f-display); color: var(--grape-ink); }
+.portrait { width: 64px; height: 64px; border-radius: 16px; border: var(--outline); background: var(--panel-2); flex: none; overflow: hidden; display: grid; place-items: center; }
+.portrait svg { width: 100%; height: 100%; }
+/* Frame-size classes (html.gh-short / gw-narrow / gw-tiny) are set by G.HUD.layoutVars from the
+   game frame, not media queries: while the page is CSS-rotated, the physical viewport is portrait and
+   max-height/max-width queries would pick the wrong rules. */
+html.gh-short .panel { padding: 10px; gap: 8px; }
+html.gh-short .panel-head h2 { font-size: 20px; }
+html.gh-short .btn { min-height: 42px; padding: 8px 14px; font-size: 15px; }
+html.gh-short .btn.big { min-height: 52px; font-size: 18px; }
+html.gh-short .btn.icon { width: 42px; height: 42px; min-height: 0; padding: 0; }
+html.gh-short .logo { font-size: clamp(34px, calc(var(--gh, 100cqh) * 0.09), 70px); }
+/* ---------- Screen transitions (07_ui.js) ----------
+   open : wrap gets .ui-enter for ~0.65 s — backdrop fades, content springs in (scale + fade), lists and
+          cards cascade. Everything is interactive from the first frame (no pointer-events games).
+   close: logically immediate; the old wrap stays in place as an inert .ui-ghost (no data-screen, no
+          ids, pointer-events none) for 0.2 s while it fades/shrinks out, then it is removed.
+   refresh after a tab tap: .ui-tabswap slides the new tab body in from the tab's side.
+   Keyframes use the independent scale/translate properties so roots keep their own transforms;
+   :where() keeps these defaults weaker than any screen's own animation. */
+.screen.ui-enter { animation: uiFadeIn 0.18s var(--ease-out) backwards; }
+:where(.screen.ui-enter) > * { animation: uiPop 0.34s var(--ease-out) backwards; }
+:where(.screen.ui-enter.ui-fb) > *, :where(.screen.ui-enter) > :where(.mm-title, .hl-root, .mm-talk-root) { animation: none; }
+:where(.screen.ui-enter) > :where(.mm-res) { animation: uiSettle 0.42s var(--ease-out) backwards; }
+@keyframes uiFadeIn { from { opacity: 0; } }
+@keyframes uiPop { 0% { opacity: 0; scale: 0.9; translate: 0 10px; } 30% { opacity: 1; } 45% { scale: 1.02; translate: 0 -1px; } 72% { scale: 0.995; translate: 0 0; } 100% { opacity: 1; scale: 1; translate: 0 0; } }
+@keyframes uiSettle { from { scale: 1.05; } to { scale: 1; } }
+/* cascade: grids, tile lists, pause-menu buttons, building rail tabs (first six staggered, rest together) */
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > * { animation: uiItemIn 0.26s 0.13s var(--ease-out) backwards; }
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > :nth-child(1) { animation-delay: 0.04s; }
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > :nth-child(2) { animation-delay: 0.058s; }
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > :nth-child(3) { animation-delay: 0.076s; }
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > :nth-child(4) { animation-delay: 0.094s; }
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > :nth-child(5) { animation-delay: 0.112s; }
+@keyframes uiItemIn { 0% { opacity: 0; translate: 0 10px; scale: 0.96; } 65% { opacity: 1; translate: 0 -1px; scale: 1.01; } 100% { opacity: 1; translate: 0 0; scale: 1; } }
+/* progress bars fill up as the screen arrives */
+:where(.screen.ui-enter) :where(.mm-bar, .bar) > i { animation: uiBarFill 0.5s 0.12s var(--ease-out) backwards; transform-origin: left center; }
+@keyframes uiBarFill { from { scale: 0 1; } }
+/* closing copy */
+#ui .ui-ghost, #ui .ui-ghost * { pointer-events: none !important; }
+.screen.ui-ghost { animation: uiFadeOut 0.2s var(--ease-in) forwards; }
+#ui .screen.ui-ghost > * { animation: uiPopOut 0.2s var(--ease-in) forwards; }
+#ui .screen.ui-ghost.ui-fb > *, #ui .screen.ui-ghost > :where(.mm-title, .hl-root, .mm-res, .mm-talk-root) { animation: none; }
+@keyframes uiFadeOut { to { opacity: 0; } }
+@keyframes uiPopOut { to { opacity: 0; scale: 0.94; translate: 0 8px; } }
+/* hand-over (close + open in one tap): one steady backdrop — the closing copy drops its own and the
+   new screen's is there from the first frame (no darker dip, never two backdrop blurs) */
+#ui .screen.ui-ghost.ui-handover { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.screen.ui-enter.ui-keepbg { animation: none; }
+/* tab switch: new body slides in from the side of the tapped tab (--tab-dx/--tab-dy set by 07_ui.js) */
+.ui-tabswap :where(.panel-body, .mm-body) > * { animation: uiTabIn 0.24s var(--ease-out) backwards; }
+@keyframes uiTabIn { from { opacity: 0; translate: calc(var(--tab-dx, 0) * 1px) calc(var(--tab-dy, 0) * 1px); } }
+.ui-tabswap :where(.tab.on, .mm-tab.on, .mm-subtab.on) { animation: uiTabPop 0.32s var(--ease-out); }
+@keyframes uiTabPop { 0% { scale: 0.9; } 55% { scale: 1.07; } 100% { scale: 1; } }
+/* picking a card / language / preset / slot: the new selection pops */
+.ui-selpop :where(.mm-lang.on, .mm-preset.on, .mm-wchip.on, .mm-slot.sel, .mm-card.sel, .card.sel, .ex-card.sel, .mm-socket.full) { animation: uiSelPop 0.34s var(--ease-out); }
+@keyframes uiSelPop { 0% { scale: 0.92; } 50% { scale: 1.05; } 100% { scale: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+.reduced-motion *, .reduced-motion *::before, .reduced-motion *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+/* reduced motion: presses still give feedback, but without travel or overshoot */
+.reduced-motion :is(.btn, .tbtn, .wslot, .crosshair, .toggle, .objective .bar > i), .reduced-motion .toggle::after,
+.reduced-motion :where(.tab, .card.clickable, .mm-tab, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-subtab, .mm-wchip, .mm-card.clickable, .mm-slot, .mm-socket, .mm-quickbtn, .mm-sugchip, .mm-day) { transition-duration: 0.01ms !important; }
+.reduced-motion .btn.pressed { transform: translateY(2px); }
+.reduced-motion .tbtn.down { transform: scale(calc(var(--hud-scale) * 0.95)); }
+.reduced-motion .crosshair.on-target { scale: 1; }
+
+/* Narrow landscape phones: shrink the top-centre column so it clears the vitals and minimap. */
+/* --tc-k is that scale: a mode row's small text can keep to the 11 px floor with max(11px / var(--tc-k, 1), ...). */
+html.gw-narrow .hud-tc { --tc-k: 0.82; left: 55%; transform: translateX(-50%) scale(var(--tc-k)); transform-origin: top center; }
+/* (0.79: its 14 px chips still draw at 11 px, the smallest HUD text) */
+#hud .hud-chip.boss-phase { font-size: max(calc(11px / var(--tc-k, 1)), calc(12px * var(--ui-t, 1))); white-space: nowrap; }
+html.gw-tiny .hud-tc { --tc-k: 0.79; left: 56%; transform: translateX(-50%) scale(var(--tc-k)); }
+/* Panels that reuse the loading orb (WebGL context-loss overlay): room for the bounce inside the frame. */
+.panel .ld-orb { width: 56px; height: 56px; margin-top: 22px; flex: none; }
+
+/* While a menu is open: banners stay hidden (they would draw over the pause menu) and toasts
+   move to a bottom lane so they never cover a results title or panel header. */
+#ui.ui-menu #banner { display: none !important; }
+#ui.ui-menu #toasts { top: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); flex-direction: column-reverse; }
+/* A banner in play holds the toast lane (07_ui): toasts already up step aside until it is gone, then finish their time. */
+#toasts.play.b-hold .toast { opacity: 0; transition: opacity 0.14s; }
+#toasts.play .toast { transition: opacity 0.2s; }
+/* ...and when it cannot sit under the top-centre column without reaching the crosshair, the column's extra rows (a mode's
+   hint: the tutorial's Beepo line, Fountain Guard's wave rows) fade aside for it; timer / team / boss bars stay (07_ui) */
+#hud .hud-tc > .col { transition: opacity 0.2s; }
+#hud.b-tc .hud-tc > .col { opacity: 0; transition-duration: 0.14s; }
+
+/* Pause: the button list scrolls if it has to (padding keeps focus rings inside the scroller); when it would not fit
+   (big text on a small phone: 07b adds .two) the buttons under Resume share rows of two. A list that fits stays one
+   column, so a controller's D-pad simply walks down it. */
+.pause-btns { min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; padding: 8px; margin: -8px; }
+/* Pause / Settings headers and the pause buttons share the game's icon set (drawn here so the core screens stay as
+   they are): a sunny pause badge, a gear, and one glyph per pause action in the label's own colour. */
+:is([data-screen="pause"], [data-screen="settings"]) .panel-head h2 { display: flex; align-items: center; gap: 10px; }
+:is([data-screen="pause"], [data-screen="settings"]) .panel-head h2::before { content: ''; width: 34px; height: 34px; flex: none; background: center / contain no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23ffd23f' stroke='%231e1a4d' stroke-width='2.6'/%3E%3Crect x='10.5' y='9' width='4' height='14' rx='1.6' fill='%231e1a4d'/%3E%3Crect x='17.5' y='9' width='4' height='14' rx='1.6' fill='%231e1a4d'/%3E%3C/svg%3E"); }
+[data-screen="settings"] .panel-head h2::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M14 3h4l.8 3.5 2.6 1.1 3-2 2.8 2.8-2 3 1.1 2.6L29 14v4l-3.5.8-1.1 2.6 2 3-2.8 2.8-3-2-2.6 1.1L18 29h-4l-.8-3.5-2.6-1.1-3 2-2.8-2.8 2-3-1.1-2.6L3 18v-4l3.5-.8 1.1-2.6-2-3 2.8-2.8 3 2 2.6-1.1z' fill='%23c9d4f0' stroke='%231e1a4d' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='16' r='4.5' fill='%23fff' stroke='%231e1a4d' stroke-width='2'/%3E%3C/svg%3E"); }
+.screen.ui-enter:is([data-screen="pause"], [data-screen="settings"]) .panel-head h2::before { animation: mmPortraitIn 0.5s 0.06s var(--ease-out) backwards; }
+[data-screen="pause"] .btn > span[data-i18n]::before { content: ''; display: inline-block; width: 1.2em; height: 1.2em; margin-right: 0.45em; vertical-align: -0.24em; background: center / contain no-repeat; }
+[data-screen="pause"] .btn > span[data-i18n="pause.resume"]::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 5.5v13l11-6.5z' fill='%231e1a4d' stroke='%231e1a4d' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+[data-screen="pause"] .btn > span[data-i18n="pause.restart"]::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 12a7 7 0 1 1-2.05-4.95' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M19.5 3.5v5h-5' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+[data-screen="pause"] .btn > span[data-i18n="pause.settings"]::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.6 2.5h2.8l.5 2.5 1.9.8 2.1-1.4 2 2-1.4 2.1.8 1.9 2.5.5v2.8l-2.5.5-.8 1.9 1.4 2.1-2 2-2.1-1.4-1.9.8-.5 2.5h-2.8l-.5-2.5-1.9-.8-2.1 1.4-2-2 1.4-2.1-.8-1.9-2.5-.5v-2.8l2.5-.5.8-1.9-1.4-2.1 2-2 2.1 1.4 1.9-.8z' fill='none' stroke='%231e1a4d' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='12' r='3' fill='none' stroke='%231e1a4d' stroke-width='2'/%3E%3C/svg%3E"); }
+[data-screen="pause"] .btn > span[data-i18n="hl.title"]::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%23fff' stroke-width='2.4'%3E%3Ccircle cx='7.5' cy='16.5' r='3.6'/%3E%3Ccircle cx='17' cy='16' r='4.6'/%3E%3Ccircle cx='17.5' cy='6.5' r='2.8'/%3E%3Cpath d='M4 7.5h7M7.5 4v7' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E"); }
+[data-screen="pause"] .btn > span[data-i18n="pause.quit"]::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.5 11.5L12 4l8.5 7.5' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M6 10v9.5h4.5v-5h3v5H18V10' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+/* (the pause list breathes a little more on roomy frames) */
+html:not(.gh-short) [data-screen="pause"] .pause-btns { gap: 12px; }
+.pause-btns.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-content: start; }
+.pause-btns.two > :first-child, .pause-btns.two > :last-child:nth-child(even) { grid-column: 1 / -1; }
+
+/* ---------- Text & UI size: menus ----------
+   Every screen's content is zoomed by --ui-mz (08_hud layoutVars: S 0.92 / M 1 / L 1.1 / XL 1.2, eased on
+   short frames). zoom keeps percentages and insets, so panels still fit the frame and just scroll more.
+   The button-layout editor works in game-frame pixels and is never zoomed. */
+#ui .screen:not([data-screen="hud-editor"]) { zoom: var(--ui-mz, 1); }
+
+/* ---------- Sound captions (08_hud, fed by G.Audio.onCaption) ----------
+   Bottom-centre band above the weapon block and below the crosshair; 08_hud places it (--cap-b bottom,
+   --cap-x centre, --cap-w width, --cap-fs font) when a caption arrives. At most 2 lines on a soft dark
+   backing, each with an arrow toward the sound (up = ahead). Lines pop in (.in) and fade out (.out). */
+.captions { position: absolute; left: var(--cap-x, 50%); bottom: var(--cap-b, 24%); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px;
+  width: max-content; max-width: var(--cap-w, min(calc(var(--gw, 100cqw) * 0.62), 560px)); pointer-events: none; }
+.cap { display: flex; align-items: center; gap: 0.4em; max-width: 100%; box-sizing: border-box; background: rgba(30,26,77,0.62); color: #fff; border-radius: 12px; padding: 2px 12px 2px 7px;
+  font: 800 var(--cap-fs, 16px)/1.25 var(--f-body); text-shadow: 0 1px 0 rgba(0,0,0,0.35); }
+.cap.in { animation: capIn 0.26s var(--ease-out) backwards; }
+.cap.out { animation: capOut 0.3s var(--ease-in) forwards; }
+@keyframes capIn { from { opacity: 0; translate: 0 6px; } }
+@keyframes capOut { to { opacity: 0; } }
+.cap > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.cap .ar { width: 1.15em; height: 1.15em; flex: none; display: block; color: var(--sun); }
+.cap .ar svg { width: 100%; height: 100%; display: block; }
+.cap[data-dir="left"] .ar svg { rotate: -90deg; } .cap[data-dir="right"] .ar svg { rotate: 90deg; } .cap[data-dir="behind"] .ar svg { rotate: 180deg; }
+
+/* ---------- Controller focus (06_input menu navigation) ---------- */
+/* deep grape (not the sun-yellow keyboard ring): it reads on yellow buttons, white panels and the 3D scene alike;
+   an outline only, so the control's own shadow and animations stay untouched */
+#ui .gp-focus { outline: 4px solid #6b4dff !important; outline-offset: 3px; }
+#ui .gp-focus.toggle, #ui input[type=range].gp-focus, #ui select.gp-focus { outline-offset: 4px; }
+#hud .hud-chip .pad-g { margin-right: 2px; }
+
+/* ---------- Settings additions (07b) ---------- */
+.set-sec { font: var(--fw-d) 15px/1.2 var(--f-display); color: var(--grape-ink); margin: 14px 0 0; letter-spacing: 0.02em; display: flex; align-items: center; gap: 8px; }
+.set-sec::after { content: ''; flex: 1; height: 3px; border-radius: 3px; background: rgba(30,26,77,0.1); }
+.set-sec:first-child { margin-top: 2px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; justify-self: start; }
+.seg > button { min-height: 38px; min-width: 44px; padding: 6px 12px; border-radius: 11px; border: var(--outline); background: #fff; color: var(--ink); font: 800 14px/1.1 var(--f-body); cursor: pointer; box-shadow: 0 3px 0 var(--ink); }
+.seg > button.on { background: var(--sun); color: var(--ink); text-shadow: none; }
+.seg > button:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; justify-self: start; }
+.swatches > button { width: 38px; height: 38px; border-radius: 50%; border: var(--outline); box-shadow: 0 3px 0 var(--ink); cursor: pointer; padding: 0; position: relative; }
+.swatches > button.on::after { content: ''; position: absolute; inset: -7px; border-radius: 50%; border: 3px solid var(--grape-ink); }
+.swatches > button:focus-visible { outline: 3px solid var(--sun); outline-offset: 5px; }
+.set-note { display: flex; align-items: center; gap: 8px; font: 800 14px/1.35 var(--f-body); }
+.set-note svg { width: 22px; height: 22px; flex: none; }
+.set-note.bad { color: #c2263a; }
+.set-build { font: 800 14px var(--f-body); font-variant-numeric: tabular-nums; user-select: text; -webkit-user-select: text; }
+.save-code { width: 100%; box-sizing: border-box; min-height: 96px; max-height: 40cqh; resize: none; border: var(--outline); border-radius: 12px; padding: 8px 10px; background: #fff; color: var(--ink);
+  font: 600 12px/1.35 ui-monospace, Menlo, Consolas, monospace; word-break: break-all; user-select: text; -webkit-user-select: text; touch-action: auto; }
+.save-err { color: #c2263a; font: 800 14px/1.4 var(--f-body); min-height: 1.4em; margin: 0; }
+.save-rec p { margin: 0; line-height: 1.5; }
+.save-rec .card { gap: 2px; }
+
+/* ---------- Storage-blocked notice (07b): a persistent pill on the title and in town ---------- */
+.save-warn { position: absolute; left: 50%; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); display: flex; align-items: center; gap: 6px;
+  max-width: calc(var(--gw, 100cqw) * 0.5); box-sizing: border-box; padding: 4px 12px 4px 8px; border-radius: 99px; border: 3px solid var(--ink); background: #fff3c4; color: var(--ink);
+  font: 800 max(13px, calc(13px * var(--ui-t)))/1.25 var(--f-body); box-shadow: 0 3px 0 var(--shadow); pointer-events: auto; cursor: pointer; }
+.save-warn svg { width: 20px; height: 20px; flex: none; }
+.save-warn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+#hud .save-warn-chip { cursor: pointer; font-size: max(13px, calc(13px * var(--ui-t))); padding: 3px 10px 3px 6px; }
+#hud .save-warn-chip svg { width: 18px; height: 18px; flex: none; }
+/* Settings tabs on short frames (and with big text): one compact row that scrolls sideways if it must */
+html.gh-short #ui [data-screen="settings"] .tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; margin-bottom: -4px; }
+html.gh-short #ui [data-screen="settings"] .tabs::-webkit-scrollbar { display: none; }
+html.gh-short #ui [data-screen="settings"] .tab { padding: 6px 10px; font-size: 13px; flex: none; }
+
+}
+@supports not (width: 1cqw) {
+/* Marmalune Rangers — single-look playful game UI (deliberately one visual world, no theme switch).
+   Layout: fullscreen canvas, touch layer above it, DOM UI on top; HUD hugs safe-area edges. */
+:root {
+  --ink: #1e1a4d;        /* outlines + text */
+  --ink-soft: #4a4680;
+  --panel: #f3faff;      /* sky-tinted white panels */
+  --panel-2: #dff1ff;
+  --sky: #33b5ff;
+  --mint: #3fe0b8;
+  --sun: #ffd23f;
+  --coral: #ff6b8b;
+  --grape: #8f6bff;
+  --danger: #ff4d5e;
+  /* deeper twins for text on colour: white bold button labels (3.7-4.5:1), badges (--badge: white 12 px, 4.7:1) and
+     grape headings on light panels (5.6:1) */
+  --sky-deep: #1e88e5; --coral-deep: #e8456f; --grape-deep: #7d5bf0; --grape-ink: #6a48d8; --badge: #d6315c;
+  --good: #33d17a;
+  --shadow: rgba(30, 26, 77, 0.35);
+  --r-common: #c3cbd6; --r-uncommon: #3ddc97; --r-rare: #4aa8ff; --r-epic: #b26bff; --r-legend: #ffb627; --r-mythic: #ff4d6d;
+  --team-a: #ff8a1f; --team-b: #3d7bff;
+  --f-display: 'Dela Gothic One', 'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', 'Arial Rounded MT Bold', system-ui, sans-serif;
+  --f-body: 'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', 'PingFang SC', 'Microsoft YaHei', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  --radius: 18px;
+  --outline: 3px solid var(--ink);
+  --hud-scale: 1;
+  /* Text & UI size (Settings → Accessibility, 08_hud layoutVars): --ui-t scales HUD text, --ui-mz zooms
+     menus, --mm-px is the minimap size. Touch buttons follow the separate button size (--ui-u). */
+  --ui-t: 1; --ui-mz: 1; --mm-px: 120px;
+  /* motion: short, springy, transform/opacity only (07_ui.js / 08_hud.js drive the rest) */
+  --ease-out: cubic-bezier(.2, .9, .3, 1);
+  --ease-in: cubic-bezier(.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-bouncy: cubic-bezier(.3, 1.9, .5, 1);
+  color-scheme: light;
+}
+:lang(zh-Hans) { --f-display: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif; --f-body: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif; }
+:lang(zh-Hant) { --f-display: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', system-ui, sans-serif; --f-body: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', system-ui, sans-serif; }
+:lang(ko) { --f-display: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif; --f-body: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif; }
+:lang(ru) { --f-display: 'M PLUS Rounded 1c', system-ui, sans-serif; }
+/* Display weight + outline per language (--fw-d, --ds): Dela Gothic One is one heavy weight, but zh / ko headings fall
+   back to system fonts and ru to M PLUS Rounded, whose 400 weight is thin — under a 3-5 px outline the fill vanished
+   and the headings looked hollow. There the display face is drawn at 800 with a ~1 px outline (every outlined display
+   rule writes its stroke as max(1px, calc(<size> * var(--ds, 1)))). */
+:root { --fw-d: 400; --ds: 1; }
+:lang(zh-Hans), :lang(zh-Hant), :lang(ko) { --fw-d: 800; --ds: 0.34; }
+:lang(ru) { --fw-d: 800; --ds: 0.5; }
+/* Japanese / Korean: lines break at spaces, after punctuation and at the phrase breaks 07_ui puts into Japanese text
+   (<wbr>: G.UI.wbr / G.UI.setText, also between the known words of a katakana compound), never inside a word
+   ("ミッションクリ/ア", "すすも/う"), clamped descriptions included; only a single word longer than its whole box still
+   wraps rather than overflow. (Equal-specificity rules later in the sheet, e.g. the save code's break-all, still win.) */
+:lang(ja), :lang(ko) { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
+:lang(ja) .mm-sug-text, :lang(ko) .mm-sug-text { -webkit-line-clamp: 3; }
+/* Rally track cards on a tablet / desktop (a 105 px name at 13 px): "グロウキャップ・" came out a hair wider than the card, so
+   the fallback above started the next line with "・"; slightly tighter tracking keeps each part of the name whole */
+html:not(.gh-short):lang(ja) .rr-tcard h3 { letter-spacing: -0.03em; }
+
+html, body { height: 100%; background: #0d1030; overflow: hidden; }
+#app { position: fixed; inset: 0; overflow: hidden; background: #8fd8ff; font-family: var(--f-body); color: var(--ink);
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; touch-action: none; }
+#gl { position: absolute; inset: 0; display: block; z-index: 0; }
+#touch { position: absolute; inset: 0; z-index: 2; touch-action: none; pointer-events: none; }
+#touch.active { pointer-events: auto; }
+#ui { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+#ui button, #ui .clickable, #ui .panel, #ui .modal, #ui .screen { pointer-events: auto; }
+#ui .screen.passthrough { pointer-events: none; }
+/* Upright phone (frame rotated by G.Screen): native panning cannot follow the rotation, so menus are
+   scrolled by 07_ui.js; stop the browser from starting (and cancelling) its own pan. */
+html.force-landscape #ui .screen, html.force-landscape #ui .screen * { touch-action: none !important; }
+button { font-family: inherit; color: inherit; }
+[hidden] { display: none !important; }
+
+/* ---------- Touch controls ---------- */
+.joy-base { position: absolute; left: 0; top: 0; width: 116px; height: 116px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.20), rgba(255,255,255,0.08)); border: 3px solid rgba(255,255,255,0.55); pointer-events: none; }
+.joy-knob { position: absolute; left: 30px; top: 30px; width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.85);
+  box-shadow: 0 4px 0 rgba(30,26,77,0.35); border: 3px solid var(--ink); }
+/* border-box: the layout engine (07c) sizes and spaces buttons by their full diameter */
+/* Press: instant squash + inner glow; release springs back with a little overshoot (transition on the
+   base state). The glow is an inner pseudo layer (opacity only), the outer ring a cheap box-shadow. */
+.tbtn { position: absolute; box-sizing: border-box; width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; color: var(--ink);
+  background: rgba(255,255,255,0.72); border: 3px solid var(--ink); pointer-events: auto; touch-action: none;
+  /* glossy toy-button bevel: a light crescent along the top inside the rim, a soft shade along the bottom, the ink drop
+     under it (the held state, .down, swaps these for an inset "pushed in" shadow) */
+  box-shadow: inset 0 5px 0 rgba(255,255,255,0.4), inset 0 -4px 0 rgba(30,26,77,0.13), 0 5px 0 rgba(30,26,77,0.4);
+  transform: scale(var(--hud-scale)); transition: transform 0.3s var(--ease-bouncy), box-shadow 0.22s var(--ease-out); --cd: 0; overflow: hidden; }
+.tbtn::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 50% 42%, rgba(255,255,255,0.95), rgba(255,255,255,0.35) 45%, rgba(255,255,255,0) 72%); opacity: 0; transition: opacity 0.3s var(--ease-out); pointer-events: none; }
+.tbtn::after { content: ''; position: absolute; inset: 0; background: rgba(30,26,77,0.55); transform-origin: bottom; transform: scaleY(var(--cd)); pointer-events: none; }
+.tbtn .ico { width: 58%; height: 58%; display: block; position: relative; z-index: 1; }
+.tbtn .ico svg { width: 100%; height: 100%; display: block; }
+.tbtn .cd { position: absolute; z-index: 2; font: 800 15px var(--f-body); color: #fff; text-shadow: 0 2px 0 var(--ink); }
+/* (held: the disc keeps its own colour and its icon — a held fire button used to turn into a blank pale disc — and
+   reads as pushed in: a little smaller, an inset ink shadow along its top, and the glow only as a ring outside it) */
+.tbtn.down { transform: scale(calc(var(--hud-scale) * 0.9)); box-shadow: inset 0 4px 0 rgba(30,26,77,0.34), inset 0 -2px 0 rgba(255,255,255,0.28), 0 1px 0 rgba(30,26,77,0.45), 0 0 0 3px rgba(255,255,255,0.9), 0 0 14px 5px rgba(255,255,255,0.55);
+  transition-duration: 0.05s, 0.05s; }
+.tbtn.down .ico { filter: drop-shadow(0 1px 0 rgba(30,26,77,0.45)); }
+/* cooldown finished: one soft flash. 06_input adds .cd-done only on the frame a running cooldown completes
+   (and takes it off again), so a button that is already ready, or that re-appears, never flashes; .ready
+   stays the plain state class (mode styles may use it). */
+.tbtn.cd-done::before { animation: tbReady 0.5s var(--ease-out) 1; }
+@keyframes tbReady { 0% { opacity: 0.85; } 100% { opacity: 0; } }
+/* Right-thumb cluster: two arcs around the fire button in the bottom-right corner. */
+.tb-fire { width: 86px; height: 86px; right: calc(24px + env(safe-area-inset-right, 0px)); bottom: calc(28px + env(safe-area-inset-bottom, 0px)); background: rgba(255,107,139,0.85); color: #fff; }
+.tb-jump { width: 66px; height: 66px; right: calc(132px + env(safe-area-inset-right, 0px)); bottom: calc(26px + env(safe-area-inset-bottom, 0px)); background: rgba(63,224,184,0.88); }
+.tb-slide, .tb-swim { width: 56px; height: 56px; right: calc(108px + env(safe-area-inset-right, 0px)); bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
+.tb-reload { width: 48px; height: 48px; right: calc(42px + env(safe-area-inset-right, 0px)); bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+.tb-ability { width: 58px; height: 58px; right: calc(216px + env(safe-area-inset-right, 0px)); bottom: calc(60px + env(safe-area-inset-bottom, 0px)); background: rgba(255,210,63,0.92); }
+.tb-gadget { width: 52px; height: 52px; right: calc(186px + env(safe-area-inset-right, 0px)); bottom: calc(146px + env(safe-area-inset-bottom, 0px)); background: rgba(143,107,255,0.88); color: #fff; }
+.tb-swap { width: 48px; height: 48px; right: calc(118px + env(safe-area-inset-right, 0px)); bottom: calc(200px + env(safe-area-inset-bottom, 0px)); }
+.tb-interact { width: 72px; height: 72px; right: 40%; bottom: calc(24% + env(safe-area-inset-bottom, 0px)); background: rgba(255,210,63,0.96); animation: pulse 1.1s ease-in-out infinite; }
+.tb-pause { width: 46px; height: 46px; left: calc(14px + env(safe-area-inset-left, 0px)); top: calc(12px + env(safe-area-inset-top, 0px)); }
+.tb-ping { width: 44px; height: 44px; right: calc(150px + env(safe-area-inset-right, 0px)); top: calc(14px + env(safe-area-inset-top, 0px)); }
+.tb-boost { width: 96px; height: 96px; right: calc(28px + env(safe-area-inset-right, 0px)); bottom: calc(32px + env(safe-area-inset-bottom, 0px)); background: rgba(255,210,63,0.92); }
+.tb-brake { width: 68px; height: 68px; right: calc(146px + env(safe-area-inset-right, 0px)); bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
+.tb-item { width: 64px; height: 64px; right: calc(56px + env(safe-area-inset-right, 0px)); bottom: calc(150px + env(safe-area-inset-bottom, 0px)); background: rgba(143,107,255,0.88); color: #fff; }
+#touch[data-layout="race"] .tb-fire { width: 72px; height: 72px; right: calc(5% + env(safe-area-inset-right, 0px)); bottom: calc(50% - 36px); }
+#touch[data-layout="hub"] .tb-fire { width: 66px; height: 66px; bottom: calc(118px + env(safe-area-inset-bottom, 0px)); right: calc(30px + env(safe-area-inset-right, 0px)); }
+#touch[data-layout="hub"] .tb-jump { right: calc(30px + env(safe-area-inset-right, 0px)); bottom: calc(30px + env(safe-area-inset-bottom, 0px)); }
+#touch[data-layout="turf"] .tb-swim { width: 66px; height: 66px; right: calc(112px + env(safe-area-inset-right, 0px)); bottom: calc(110px + env(safe-area-inset-bottom, 0px)); background: rgba(61,123,255,0.85); color: #fff; }
+/* (individual `scale` so the pulse composes with the press squash on `transform`) */
+@keyframes pulse { 0%,100% { scale: 1; } 50% { scale: 1.08; } }
+/* Controls pop in when gameplay input comes back (#touch.active) and whenever a contextual button
+   appears (display none -> shown restarts it). Scale only: the player's button opacity is inline,
+   and :where() keeps mode/tutorial animations (e.g. .tbtn.tut-pulse) stronger than this default. */
+:where(#touch.active) .tbtn { animation: tbIn 0.34s var(--ease-out) backwards; }
+:where(#touch.active) .tb-interact { animation: tbIn 0.34s var(--ease-out) backwards, pulse 1.1s 0.34s ease-in-out infinite; }
+@keyframes tbIn { 0% { scale: 0.55; } 60% { scale: 1.08; } 100% { scale: 1; } }
+
+/* ---------- Generic UI ---------- */
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: calc(14px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) calc(16px + env(safe-area-inset-left, 0px));
+  overflow: hidden; }
+.screen.dim { background: rgba(20, 16, 60, 0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.panel { box-sizing: border-box; background: var(--panel); border: var(--outline); border-radius: var(--radius); box-shadow: 0 6px 0 var(--shadow), 0 18px 40px rgba(20,16,60,0.25);
+  padding: 16px; max-width: min(980px, 100%); width: 100%; max-height: 100%; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.panel.narrow { max-width: 460px; }
+.panel-head { display: flex; align-items: center; gap: 10px; }
+.panel-head h2 { font: var(--fw-d) clamp(20px, 3.6vw, 30px)/1.1 var(--f-display); margin: 0; flex: 1; text-wrap: balance; letter-spacing: 0.01em; }
+.panel-body { overflow-y: auto; overflow-x: hidden; min-height: 0; flex: 1; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding-right: 4px; }
+.panel-body::-webkit-scrollbar { width: 8px; } .panel-body::-webkit-scrollbar-thumb { background: var(--ink-soft); border-radius: 8px; }
+/* Tactile buttons: press = push down + squash (fast), release = spring back with overshoot.
+   `.pressed` is set by 07_ui.js from pointer events (iOS gives no reliable :active on touch, and a
+   drag that turns into a scroll must release it); :active is kept for mouse/keyboard only. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 10px 18px; border-radius: 14px; border: var(--outline);
+  background: #fff; color: var(--ink); font: 800 16px/1.1 var(--f-body); box-shadow: 0 4px 0 var(--ink); cursor: pointer; text-align: center;
+  transition: transform 0.34s var(--ease-bouncy), box-shadow 0.22s var(--ease-out), filter 0.15s; }
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 5px 0 var(--ink); filter: brightness(1.05) saturate(1.06); }
+  .btn:active { transform: translateY(3px) scale(0.95); box-shadow: 0 1px 0 var(--ink); transition-duration: 0.06s; }
+}
+.btn.pressed { transform: translateY(3px) scale(0.95); box-shadow: 0 1px 0 var(--ink); transition-duration: 0.06s; filter: brightness(0.97); }
+.btn:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+/* One focus ring for every pressable surface (keyboard / switch access). */
+:is(.tab, .card.clickable, .toggle, .mm-tab, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-subtab, .mm-wchip, .mm-card.clickable, .mm-slot, .mm-socket, .mm-quickbtn, .mm-sugchip):focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+/* Other pressables squash with the independent `scale` property, so states that already use
+   `transform` (.mm-tab.on, .mm-preset.on, ...) keep their pose while pressed. */
+:where(.tab, .card.clickable, .mm-tab, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-subtab, .mm-wchip, .mm-card.clickable, .mm-slot, .mm-socket, .mm-quickbtn, .mm-sugchip, .mm-day) { transition: scale 0.34s var(--ease-bouncy), transform 0.3s var(--ease-spring); }
+:where(.tab, .card.clickable, .mm-tab, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-subtab, .mm-wchip, .mm-card.clickable, .mm-slot, .mm-socket, .mm-quickbtn, .mm-sugchip).pressed { scale: 0.96; transition-duration: 0.06s; }
+@media (hover: hover) and (pointer: fine) {
+  :where(.card.clickable, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-wchip, .mm-card.clickable, .mm-slot):hover { scale: 1.015; }
+  :where(.card.clickable, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-wchip, .mm-card.clickable, .mm-slot):active { scale: 0.97; transition-duration: 0.06s; }
+}
+.btn.primary { background: var(--sun); }
+.btn.go { background: var(--mint); }
+/* coloured buttons: fills deep enough that their white bold labels (with the ink drop shadow) stay readable: 3.7-4.5:1 */
+.btn.hot { background: var(--coral-deep); color: #fff; text-shadow: 0 2px 0 rgba(30,26,77,0.45); }
+.btn.cool { background: var(--sky-deep); color: #fff; text-shadow: 0 2px 0 rgba(30,26,77,0.45); }
+.btn.grape { background: var(--grape-deep); color: #fff; text-shadow: 0 2px 0 rgba(30,26,77,0.45); }
+.btn.small { min-height: 38px; padding: 6px 12px; font-size: 14px; border-radius: 11px; }
+.btn.icon { width: 46px; height: 46px; min-height: 0; padding: 0; border-radius: 50%; flex: none; }
+.btn.big { min-height: 64px; font-size: 20px; padding: 12px 26px; border-radius: 18px; }
+.btn[disabled], .btn.disabled { opacity: 0.45; filter: grayscale(0.6); pointer-events: none; }
+.btn svg { width: 22px; height: 22px; flex: none; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.row.end { justify-content: flex-end; } .row.center { justify-content: center; } .row.between { justify-content: space-between; }
+.col { display: flex; flex-direction: column; gap: 10px; }
+.grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(210px, 100%), 1fr)); }
+.grid.tight { grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); }
+.card { background: #fff; border: var(--outline); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 0 var(--shadow); min-width: 0; position: relative; }
+.card.clickable { cursor: pointer; }
+.card.clickable:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--shadow); }
+.card.sel { outline: 4px solid var(--sun); outline-offset: 1px; }
+.card.locked { opacity: 0.6; }
+.card h3 { margin: 0; font: 800 16px/1.2 var(--f-body); }
+.card p { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink-soft); }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font: 800 12px/1.4 var(--f-body); border: 2px solid var(--ink); background: var(--panel-2); letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+.rar-common { --rc: var(--r-common); } .rar-uncommon { --rc: var(--r-uncommon); } .rar-prismatic { --rc: #ff7ad9; } .rar-rare { --rc: var(--r-rare); } .rar-epic { --rc: var(--r-epic); } .rar-legendary { --rc: var(--r-legend); } .rar-mythic { --rc: var(--r-mythic); }
+.card[class*="rar-"] { border-color: var(--ink); box-shadow: 0 4px 0 var(--rc, var(--shadow)); }
+.tag[class*="rar-"] { background: var(--rc); }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { padding: 8px 14px; border-radius: 12px; border: var(--outline); background: #fff; font: 800 14px var(--f-body); cursor: pointer; box-shadow: 0 3px 0 var(--ink); color: var(--ink); }
+/* selected = sunny yellow with ink text everywhere (settings tabs, segmented choices, sub-tabs, the town rail): 11:1 */
+.tab.on { background: var(--sun); color: var(--ink); text-shadow: none; }
+.stat { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.stat b { font-variant-numeric: tabular-nums; }
+.bar { height: 10px; border-radius: 99px; background: rgba(30,26,77,0.15); border: 2px solid var(--ink); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--mint); border-radius: 99px; }
+.money { display: inline-flex; align-items: center; gap: 6px; font: 800 16px var(--f-body); font-variant-numeric: tabular-nums; }
+.coin { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff6b0, #ffc928 55%, #e09a00); border: 2px solid var(--ink); display: inline-block; flex: none; }
+.part-ico { width: 30px; height: 30px; border-radius: 9px; border: 2px solid var(--ink); display: inline-grid; place-items: center; flex: none; background: #fff; }
+.part-ico svg { width: 22px; height: 22px; }
+.muted { color: var(--ink-soft); }
+.small { font-size: 12px; }
+.center { text-align: center; }
+.hr { height: 3px; background: var(--ink); opacity: 0.12; border-radius: 3px; }
+select.sel, input[type=range] { font: 700 15px var(--f-body); }
+select.sel { min-height: 44px; border: var(--outline); border-radius: 12px; padding: 6px 10px; background: #fff; color: var(--ink); }
+input[type=range] { width: 100%; accent-color: var(--grape); min-height: 32px; }
+.setting { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 10px; align-items: center; padding: 8px 0; border-bottom: 2px dashed rgba(30,26,77,0.12); }
+.toggle { width: 60px; height: 34px; border-radius: 99px; border: var(--outline); background: #d7dbe6; position: relative; cursor: pointer; justify-self: start; }
+.toggle { transition: background-color 0.18s var(--ease-out); }
+.toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); transition: transform 0.32s var(--ease-bouncy); }
+.toggle.on { background: var(--mint); } .toggle.on::after { transform: translateX(26px); }
+.toggle.pressed::after { scale: 1.12 0.9; }
+
+/* ---------- Toasts / banner / loading ---------- */
+#toasts { position: absolute; left: 50%; top: calc(128px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; width: min(calc(var(--gw, 100vw) * 0.92), 520px); }
+.toast { background: var(--panel); border: var(--outline); border-radius: 14px; padding: 8px 14px; font: 800 calc(14px * var(--ui-t))/1.3 var(--f-body); box-shadow: 0 4px 0 var(--shadow);
+  display: flex; gap: 8px; align-items: center; animation: toastIn 0.25s cubic-bezier(.2,1.6,.4,1); max-width: 100%; }
+.toast.out { animation: toastOut 0.3s forwards; }
+/* In-play lane (placed by UI.toast under the top-centre HUD, clear of the crosshair). */
+#toasts.play { gap: 4px; }
+#toasts.play .toast { padding: 4px 10px; font-size: max(12px, calc(12.5px * var(--ui-t))); border-width: 2.5px; border-radius: 11px; box-shadow: 0 3px 0 var(--shadow); text-align: center; }
+#toasts.play .toast > span:first-child:not(:last-child) { width: 18px !important; height: 18px !important; flex: none; }
+@keyframes toastIn { from { transform: translateY(-14px) scale(0.9); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes toastOut { to { transform: translateY(-10px); opacity: 0; } }
+/* Toasts: spring in (overshoot then settle), ease out; neighbours glide into place (FLIP in 07_ui.js). */
+#toasts .toast { animation: toastPop 0.34s var(--ease-out) backwards; }
+#toasts .toast.out { animation: toastLeave 0.24s var(--ease-in) forwards; }
+#ui.ui-menu #toasts .toast.out { animation-name: toastLeaveDown; }
+@keyframes toastPop { 0% { transform: translateY(-12px) scale(0.86); opacity: 0; } 55% { transform: translateY(1px) scale(1.03); opacity: 1; } 78% { transform: scale(0.99); } 100% { transform: none; opacity: 1; } }
+@keyframes toastLeave { to { transform: translateY(-8px) scale(0.94); opacity: 0; } }
+@keyframes toastLeaveDown { to { transform: translateY(8px) scale(0.94); opacity: 0; } }
+#banner { position: absolute; left: 0; right: 0; top: 30%; text-align: center; pointer-events: none; }
+#banner .b-title { font: var(--fw-d) clamp(24px, min(7vw, 11vh), 66px)/1.05 var(--f-display); max-width: 92%; margin: 0 auto; text-wrap: balance; color: #fff; -webkit-text-stroke: max(1px, calc(3px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 6px 0 var(--ink); animation: bannerPop 0.5s var(--ease-out) backwards; letter-spacing: 0.02em; }
+#banner .b-sub { margin-top: 10px; font: 800 clamp(15px, 3vw, 22px) var(--f-body); color: #fff; text-shadow: 0 2px 0 var(--ink), 0 0 8px rgba(30,26,77,0.6); animation: bannerSub 0.36s 0.16s var(--ease-out) backwards; }
+@keyframes bannerIn { from { transform: scale(1.8); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes bannerPop { 0% { transform: scale(1.75); opacity: 0; } 45% { transform: scale(0.94); opacity: 1; } 70% { transform: scale(1.03); } 100% { transform: none; opacity: 1; } }
+@keyframes bannerSub { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+/* banner exit: logically hidden at once ([hidden] set by UI.banner), drawn for one more short beat */
+#banner.b-out[hidden] { display: block !important; animation: bannerOut 0.24s var(--ease-in) forwards; }
+@keyframes bannerOut { to { transform: translateY(-14px) scale(1.06); opacity: 0; } }
+/* Loading: cross-fades in/out over the scene. #loading[hidden] is the logical state (tests and code
+   read it); .ld-out keeps it drawn while it fades away, without catching taps. */
+#loading { position: absolute; inset: 0; background: linear-gradient(180deg, #2b7fe0, #63b9f5 55%, #8fd8ff); display: grid; place-items: center; pointer-events: auto; z-index: 20; overflow: hidden; }
+#loading:not([hidden]) { animation: ldIn 0.16s var(--ease-out) backwards; }
+#loading.ld-now:not([hidden]) { animation: none; }
+#loading.ld-out[hidden] { display: grid !important; pointer-events: none; animation: ldOut 0.3s var(--ease-in) forwards; }
+#loading.ld-out .ld-inner { animation: ldInnerOut 0.3s var(--ease-in) forwards; }
+@keyframes ldIn { from { opacity: 0; } }
+@keyframes ldOut { to { opacity: 0; } }
+@keyframes ldInnerOut { to { transform: scale(1.06); opacity: 0; } }
+/* soft drifting light blobs (two pseudo layers, transform-only) */
+#loading::before, #loading::after { content: ''; position: absolute; border-radius: 50%; pointer-events: none; }
+#loading::before { width: 70%; aspect-ratio: 1; left: -18%; top: -30%; background: radial-gradient(circle, rgba(255,255,255,0.28), rgba(255,255,255,0) 65%); animation: ldDrift 7s ease-in-out infinite alternate; }
+#loading::after { width: 60%; aspect-ratio: 1; right: -16%; bottom: -34%; background: radial-gradient(circle, rgba(255,246,190,0.34), rgba(255,246,190,0) 65%); animation: ldDrift 8.5s ease-in-out -3s infinite alternate-reverse; }
+@keyframes ldDrift { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(6%, 8%, 0) scale(1.12); } }
+.ld-inner { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 16px; text-align: center; position: relative; z-index: 1; }
+#loading:not([hidden]):not(.ld-now) .ld-inner { animation: ldInnerIn 0.42s 0.04s var(--ease-out) backwards; }
+@keyframes ldInnerIn { 0% { transform: translateY(12px) scale(0.94); opacity: 0; } 60% { transform: translateY(-2px) scale(1.01); opacity: 1; } 100% { transform: none; opacity: 1; } }
+.ld-stage { position: relative; width: 96px; height: 104px; display: grid; justify-items: center; align-items: end; }
+.ld-orb { width: 74px; height: 74px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--mint) 45%, #17a88a); border: 4px solid var(--ink); box-shadow: 0 6px 0 var(--ink); animation: bounce 0.7s ease-in-out infinite alternate; }
+.ld-stage .ld-orb { position: relative; z-index: 1; margin-bottom: 10px; animation: ldHop 0.9s infinite; transform-origin: 50% 100%; }
+.ld-shadow { position: absolute; bottom: 0; left: 50%; width: 62px; height: 12px; margin-left: -31px; border-radius: 50%; background: rgba(30,26,77,0.28); animation: ldShadow 0.9s infinite; }
+@keyframes bounce { from { transform: translateY(0) scale(1.05, 0.95); } to { transform: translateY(-22px) scale(0.95, 1.05); } }
+/* squash on landing, stretch on take-off, hang at the top */
+@keyframes ldHop {
+  0% { transform: translateY(0) scale(1.14, 0.84); animation-timing-function: cubic-bezier(.2,.7,.4,1); }
+  12% { transform: translateY(-6px) scale(0.92, 1.1); animation-timing-function: cubic-bezier(.2,.7,.4,1); }
+  50% { transform: translateY(-30px) scale(1, 1); animation-timing-function: cubic-bezier(.6,0,.8,.4); }
+  92% { transform: translateY(-2px) scale(0.96, 1.05); animation-timing-function: ease-out; }
+  100% { transform: translateY(0) scale(1.14, 0.84); }
+}
+@keyframes ldShadow { 0%, 100% { transform: scale(1.1); opacity: 1; } 50% { transform: scale(0.6); opacity: 0.45; } }
+.ld-text { font: var(--fw-d) 24px var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(2px * var(--ds, 1))) var(--ink); paint-order: stroke fill; display: flex; align-items: baseline; gap: 2px; }
+.ld-dots { display: inline-flex; gap: 3px; margin-left: 4px; }
+.ld-dots i { width: 7px; height: 7px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); animation: ldDot 1s ease-in-out infinite; }
+.ld-dots i:nth-child(2) { animation-delay: 0.15s; } .ld-dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes ldDot { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+.ld-tip { font: 700 14px/1.5 var(--f-body); color: #fff; max-width: 420px; text-shadow: 0 2px 0 rgba(30,26,77,0.6); }
+.ld-tip:not(:empty) { background: rgba(30,26,77,0.22); border-radius: 14px; padding: 6px 14px; }
+#fatal { position: absolute; inset: 0; background: #1e1a4d; color: #fff; display: grid; place-items: center; padding: 24px; text-align: center; font: 700 16px/1.6 var(--f-body); pointer-events: auto; z-index: 30; }
+
+/* ---------- HUD ---------- */
+#hud { position: absolute; inset: 0; pointer-events: none; font-family: var(--f-body); }
+/* opacity-only entrance (no translate: 07c measures HUD rects right away to place the buttons) */
+#hud:not([hidden]) { animation: hudIn 0.4s var(--ease-out) backwards; }
+@keyframes hudIn { from { opacity: 0; } }
+/* left edge follows the pause button (12 px inset + 46 px × button scale + border) so they never touch */
+.hud-tl { position: absolute; left: calc(max(12px, env(safe-area-inset-left, 0px) + 12px) + 14px + 46px * var(--ui-u, 1)); top: calc(12px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 6px; max-width: calc(var(--gw, 100vw) * 0.26); min-width: 150px; }
+/* (08_hud fitColumns, only while the column would run into the weapon block: wider first, then a one-line title) */
+.hud-tl.tl-wide { max-width: calc(var(--gw, 100vw) * 0.34); }
+.hud-tl.tl-tight .objective .ob-t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud-tc { position: absolute; left: 50%; transform: translateX(-50%); top: calc(8px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.hud-tr { position: absolute; right: calc(12px + env(safe-area-inset-right, 0px)); top: calc(10px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.hud-bl { position: absolute; left: calc(14px + env(safe-area-inset-left, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 6px; }
+.hud-bc { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 6px; align-items: flex-end; }
+.hud-chip { background: rgba(255,255,255,0.86); border: 3px solid var(--ink); border-radius: 12px; padding: 4px 10px; font: 800 max(14px, calc(14px * var(--ui-t)))/1.3 var(--f-body); box-shadow: 0 3px 0 var(--shadow); font-variant-numeric: tabular-nums; display: flex; gap: 6px; align-items: center; }
+.hud-chip.big { font: var(--fw-d) calc(22px * var(--ui-t))/1.1 var(--f-display); padding: 4px 14px; position: relative; }
+.hud-chip b, .hud-chip.big > span { display: inline-block; }
+/* timer: red while warned; a countdown running short (.urgent) adds a heartbeat on every second and a
+   pulsing ring (08_hud alternates .ta/.tb to restart the beat without a reflow); the ring is a pseudo
+   layer so the chip's own box never moves */
+.hud-chip.big.warn { color: #ff4d5e; }
+.hud-chip.big.warn.urgent::after { content: ''; position: absolute; inset: -3px; border-radius: 14px; box-shadow: 0 0 0 3px rgba(255,77,94,0.7), 0 0 14px rgba(255,77,94,0.6); animation: warnRing 1s ease-out infinite; pointer-events: none; }
+.hud-chip.big > span.ta { animation: tmBeatA 0.42s var(--ease-out); } .hud-chip.big > span.tb { animation: tmBeatB 0.42s var(--ease-out); }
+@keyframes tmBeatA { 0% { scale: 1.3; } 100% { scale: 1; } } @keyframes tmBeatB { 0% { scale: 1.3; } 100% { scale: 1; } }
+@keyframes warnRing { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.18, 1.3); } }
+.vitals { display: flex; flex-direction: column; gap: 4px; width: min(220px, calc(var(--gw, 100vw) * 0.26)); min-width: 150px; }
+.vbar { height: calc(15px * var(--ui-t)); border-radius: 99px; border: 3px solid var(--ink); background: rgba(30,26,77,0.35); overflow: hidden; position: relative; box-shadow: 0 3px 0 var(--shadow); }
+/* fill (i) and damage trail (s) are scaled by 08_hud.js each frame they change: the fill drops at once,
+   the pale trail waits a beat and then drains; heals rise smoothly. */
+.vbar > i { position: absolute; inset: 0; transform-origin: left; background: linear-gradient(180deg, #7dffb1, #22c46b); }
+.vbar > s { position: absolute; inset: 0; transform-origin: left; background: linear-gradient(180deg, #fffbe0, #ffd98a); text-decoration: none; }
+.vbar.sh > s { background: linear-gradient(180deg, #ffffff, #c9efff); }
+.vbar::after { content: ''; position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.vbar.fa::after { animation: vbFlashA 0.28s ease-out; } .vbar.fb::after { animation: vbFlashB 0.28s ease-out; }
+@keyframes vbFlashA { 0% { opacity: 0.55; } 100% { opacity: 0; } } @keyframes vbFlashB { 0% { opacity: 0.55; } 100% { opacity: 0; } }
+.vbar.sh > i { background: linear-gradient(180deg, #a6e6ff, #2fa7ff); }
+.vbar.sh.t2 > i { background: linear-gradient(180deg, #d9b3ff, #9a55ff); } .vbar.sh.t3 > i { background: linear-gradient(180deg, #ffe39a, #ffae1a); }
+.vbar > b { position: absolute; inset: 0; display: grid; place-items: center; font: 800 max(11px, calc(11px * var(--ui-t)))/1 var(--f-body); color: #fff; text-shadow: 0 1px 0 var(--ink); }
+.vbar.low > i { background: linear-gradient(180deg, #ff9aa6, #ff3352); animation: blink 0.6s infinite alternate; }
+@keyframes blink { to { opacity: 0.55; } }
+.ammo { font: var(--fw-d) calc(30px * var(--ui-t))/1 var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(2.5px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); text-align: right; }
+.ammo small { font-size: calc(16px * var(--ui-t)); }
+.ammo .low { color: var(--coral); }
+.ammo .heat { display: inline-block; vertical-align: middle; width: 58px; height: 14px; margin: -4px 0 0 6px; border: 3px solid var(--ink); border-radius: 99px; background: rgba(30,26,77,0.35); overflow: hidden; box-shadow: 0 3px 0 var(--ink); }
+.ammo .heat b { display: block; height: 100%; background: linear-gradient(180deg, #ffe58a, #ffb627); border-radius: 99px; transition: width 0.1s; }
+.ammo .heat.warm b { background: linear-gradient(180deg, #ffb08a, #ff6b3d); }
+.ammo .heat.hot b { background: linear-gradient(180deg, #ff9aa6, #ff3352); animation: blink 0.3s infinite alternate; }
+#hud.touch .hud-bc { flex-direction: column-reverse; align-items: center; gap: 4px; }
+#hud.touch .ammo { font-size: calc(24px * var(--ui-t)); line-height: 1; } #hud.touch .ammo small { font-size: max(12px, calc(14px * var(--ui-t))); }
+.wslots { display: flex; gap: calc(var(--slot-px, 44px) * 0.12); pointer-events: auto; }
+/* --slot-px follows the touch-button scale (08_hud layoutVars): 44 px on a 844x390 phone */
+.wslot { box-sizing: border-box; width: var(--slot-px, 44px); height: var(--slot-px, 44px); border-radius: 12px; border: 3px solid var(--ink); background: rgba(255,255,255,0.75); display: grid; place-items: center; position: relative; box-shadow: 0 3px 0 var(--shadow);
+  transition: transform 0.3s var(--ease-bouncy), background-color 0.16s, box-shadow 0.2s; }
+.wslot.on { background: var(--sun); transform: translateY(-4px); box-shadow: 0 5px 0 var(--shadow), 0 0 0 3px rgba(255,210,63,0.45); }
+.wslot svg { width: calc(var(--slot-px, 44px) * 0.76); height: calc(var(--slot-px, 44px) * 0.76); }
+.wslot .lv { position: absolute; right: -4px; bottom: -6px; font: 800 11px/1.1 var(--f-body); background: var(--ink); color: #fff; padding: 1px 4px; border-radius: 6px; }
+.wslot .xp { position: absolute; left: 4px; right: 4px; bottom: 3px; height: 3px; background: rgba(30,26,77,0.2); border-radius: 2px; overflow: hidden; }
+.wslot .xp > i { display: block; height: 100%; background: var(--grape); }
+/* Crosshair (08_hud.js writes the tick offsets / ring size: damped spread from the camera FOV + hit kick).
+   Player options (Settings → Graphics): style .xh-classic / .xh-dot / .xh-circle, colour --xh-c (always on a
+   dark ink outline), size --xh-k, opacity (inline). On a target it turns --xh-on and goes hollow so a small
+   robot shows through: classic drops the dot and thins the ticks, dot becomes a ring, circle drops its dot. */
+.crosshair { --xh-c: #fff; --xh-on: var(--coral); --xh-k: 1; position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+.crosshair i { position: absolute; background: var(--xh-c); box-shadow: 0 0 0 2px var(--ink); border-radius: 2px; transition: background-color 0.1s; }
+.crosshair .c-dot { width: calc(4px * var(--xh-k)); height: calc(4px * var(--xh-k)); left: calc(-2px * var(--xh-k)); top: calc(-2px * var(--xh-k)); border-radius: 50%; }
+.crosshair .c-l, .crosshair .c-r { width: calc(9px * var(--xh-k)); height: calc(3px * var(--xh-k)); top: calc(-1.5px * var(--xh-k)); }
+.crosshair .c-t, .crosshair .c-b { width: calc(3px * var(--xh-k)); height: calc(9px * var(--xh-k)); left: calc(-1.5px * var(--xh-k)); }
+.crosshair .c-ring { display: none; left: 0; top: 0; width: 20px; height: 20px; background: transparent; border-radius: 50%;
+  box-sizing: border-box; border: calc(2px * var(--xh-k)) solid var(--xh-c); box-shadow: 0 0 0 1.5px var(--ink), inset 0 0 0 1.5px var(--ink); transition: border-color 0.1s; }
+.crosshair.on-target i { background: var(--xh-on); }
+.crosshair.on-target .c-ring { background: transparent; border-color: var(--xh-on); }
+.crosshair.xh-classic.on-target .c-dot { opacity: 0; }
+.crosshair.xh-classic.on-target .c-l, .crosshair.xh-classic.on-target .c-r { height: calc(2px * var(--xh-k)); top: calc(-1px * var(--xh-k)); box-shadow: 0 0 0 1.5px var(--ink); }
+.crosshair.xh-classic.on-target .c-t, .crosshair.xh-classic.on-target .c-b { width: calc(2px * var(--xh-k)); left: calc(-1px * var(--xh-k)); box-shadow: 0 0 0 1.5px var(--ink); }
+.crosshair.xh-dot .c-l, .crosshair.xh-dot .c-r, .crosshair.xh-dot .c-t, .crosshair.xh-dot .c-b,
+.crosshair.xh-circle .c-l, .crosshair.xh-circle .c-r, .crosshair.xh-circle .c-t, .crosshair.xh-circle .c-b { display: none; }
+.crosshair.xh-dot .c-dot { width: calc(7px * var(--xh-k)); height: calc(7px * var(--xh-k)); left: calc(-3.5px * var(--xh-k)); top: calc(-3.5px * var(--xh-k)); }
+.crosshair.xh-dot.on-target .c-dot { width: calc(10px * var(--xh-k)); height: calc(10px * var(--xh-k)); left: calc(-5px * var(--xh-k)); top: calc(-5px * var(--xh-k));
+  background: transparent; border: calc(2px * var(--xh-k)) solid var(--xh-on); box-sizing: border-box; box-shadow: 0 0 0 1.5px var(--ink), inset 0 0 0 1.5px var(--ink); }
+.crosshair.xh-circle .c-ring { display: block; }
+.crosshair.xh-circle .c-dot { width: calc(3px * var(--xh-k)); height: calc(3px * var(--xh-k)); left: calc(-1.5px * var(--xh-k)); top: calc(-1.5px * var(--xh-k)); }
+.crosshair.xh-circle.on-target .c-dot { opacity: 0; }
+/* settings preview (07b): the same crosshair over a little sky-and-grass swatch */
+.xh-prev { position: relative; width: 120px; height: 70px; border-radius: 12px; border: var(--outline); overflow: hidden; flex: none;
+  background: linear-gradient(180deg, #8fd8ff 0%, #c9efff 55%, #8ee07a 56%, #5fc45a 100%); }
+.xh-prev .crosshair { pointer-events: none; }
+/* hit marker: played with element.animate() by 08_hud.js (no reflow per hit) */
+.hitmark { position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; opacity: 0; }
+.hitmark svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.hitmark.kill path { stroke: var(--coral); stroke-width: 4.5; }
+@keyframes hitm { 0% { opacity: 1; transform: scale(1.4); } 100% { opacity: 0; transform: scale(1); } }
+.vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 55%, rgba(255,40,70,0.55)); opacity: 0; }
+/* damage direction: arcs that keep pointing at the attacker as you turn (rotation updated per frame) */
+.dmgdir { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+.dmgdir i { position: absolute; left: -60px; top: -168px; width: 120px; height: 38px; background: radial-gradient(ellipse 50% 100% at 50% 100%, rgba(255,235,240,0.95) 0%, rgba(255,64,92,0.92) 22%, rgba(255,64,92,0.35) 55%, transparent 72%); border-radius: 50% 50% 0 0; transform-origin: 60px 168px; opacity: 0; }
+/* GDD §6 minimum HUD text 14 px: the objective text is 15 px at M (it was 13 px), never under 14 px */
+.objective { position: relative; isolation: isolate; background: rgba(255,255,255,0.88); border: 3px solid var(--ink); border-radius: 12px; padding: calc(5px * var(--ui-t)) 10px; font: 800 max(14px, calc(15px * var(--ui-t)))/1.3 var(--f-body); box-shadow: 0 3px 0 var(--shadow); }
+.objective .ob-t { font: var(--fw-d) max(14px, calc(14px * var(--ui-t)))/1.2 var(--f-display); letter-spacing: 0.03em; color: var(--grape-ink); }
+.objective .bar { margin-top: 4px; height: 8px; position: relative; }
+/* progress fill slides (transform) instead of resizing; turns gold when complete */
+.objective .bar > i { width: 100%; transform: translateX(-100%); transition: transform 0.45s var(--ease-out); }
+.objective .bar.done > i { background: linear-gradient(180deg, #ffe58a, #ffb627); }
+/* objective changed: a sunny flash behind the text and a ring that swells out (pseudo layers only) */
+.objective::before { content: ''; position: absolute; inset: 0; border-radius: 9px; background: #fff3a6; opacity: 0; z-index: -1; pointer-events: none; }
+.objective::after { content: ''; position: absolute; inset: -3px; border-radius: 13px; border: 3px solid var(--sun); opacity: 0; pointer-events: none; }
+.objective.pa::before { animation: obFlashA 0.9s ease-out; } .objective.pb::before { animation: obFlashB 0.9s ease-out; }
+.objective.pa::after { animation: obRingA 0.7s var(--ease-out); } .objective.pb::after { animation: obRingB 0.7s var(--ease-out); }
+.objective.tick.pa::before, .objective.tick.pb::before { animation: none; }
+@keyframes obFlashA { 0%, 25% { opacity: 1; } 100% { opacity: 0; } } @keyframes obFlashB { 0%, 25% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes obRingA { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.06, 1.18); } }
+@keyframes obRingB { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.06, 1.18); } }
+/* kill feed slides in from the right edge, pickups from the left; .out = leaving (then removed) */
+.feed { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+.feed div { background: rgba(30,26,77,0.72); color: #fff; padding: 3px 10px; border-radius: 10px; font: 800 max(12px, calc(13px * var(--ui-t))) var(--f-body); animation: feedIn 0.3s var(--ease-out) backwards; }
+.feed div.out { animation: feedOut 0.22s var(--ease-in) forwards; }
+@keyframes feedIn { 0% { transform: translateX(28px) scale(0.9); opacity: 0; } 60% { transform: translateX(-2px) scale(1.02); opacity: 1; } 100% { transform: none; opacity: 1; } }
+@keyframes feedOut { to { transform: translateX(22px); opacity: 0; } }
+.pickfeed { position: absolute; left: calc(14px + env(safe-area-inset-left, 0px)); top: 38%; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; align-items: flex-start;
+  overflow: hidden; padding: 2px 8px; margin: -2px -8px; }
+.pickfeed div { background: rgba(255,255,255,0.88); border: 2px solid var(--ink); padding: 3px 10px; border-radius: 10px; font: 800 max(12px, calc(13px * var(--ui-t))) var(--f-body); display: flex; align-items: center; gap: 6px; animation: pickIn 0.3s var(--ease-out) backwards; }
+.pickfeed div.out { animation: pickOut 0.22s var(--ease-in) forwards; }
+/* 08_hud fitColumns sets the top (under the top-left column) and, left-handed on touch, moves the feed to the stick
+   side on the right (it slides in from that edge, like the kill feed) */
+.pickfeed.right { left: auto; right: calc(14px + env(safe-area-inset-right, 0px)); align-items: flex-end; }
+.pickfeed div { max-width: 100%; box-sizing: border-box; } .pickfeed div > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pickfeed.right div { animation-name: feedIn; } .pickfeed.right div.out { animation-name: feedOut; }
+@keyframes pickIn { 0% { transform: translateX(-26px) scale(0.9); opacity: 0; } 60% { transform: translateX(2px) scale(1.03); opacity: 1; } 100% { transform: none; opacity: 1; } }
+@keyframes pickOut { to { transform: translateX(-20px); opacity: 0; } }
+.minimap { width: var(--mm-px, 120px); height: var(--mm-px, 120px); border-radius: 50%; border: 3px solid var(--ink); background: rgba(255,255,255,0.4); box-shadow: 0 3px 0 var(--shadow); overflow: hidden; }
+.minimap canvas { width: 100%; height: 100%; display: block; }
+.bossbar { width: min(420px, calc(var(--gw, 100vw) * 0.3)); }
+.bossbar .bn { font: var(--fw-d) 16px var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(1.5px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-align: center; }
+.bossbar .vbar > i { background: linear-gradient(180deg, #ff9ab3, #ff3f6c); }
+.teambar { display: flex; width: min(380px, calc(var(--gw, 100vw) * 0.4)); height: 22px; border: 3px solid var(--ink); border-radius: 99px; overflow: hidden; box-shadow: 0 3px 0 var(--shadow); background: #eee; }
+.teambar i { display: block; height: 100%; transition: width 0.3s; } .teambar .ta { background: var(--team-a); } .teambar .tb { background: var(--team-b); margin-left: auto; }
+.prompt { position: absolute; left: 50%; bottom: 32%; transform: translateX(-50%); background: rgba(255,255,255,0.92); border: 3px solid var(--ink); border-radius: 14px; padding: 6px 14px; font: 800 calc(15px * var(--ui-t)) var(--f-body); box-shadow: 0 4px 0 var(--shadow); white-space: nowrap;
+  animation: promptIn 0.3s var(--ease-out) backwards; transform-origin: 50% 100%; }
+@keyframes promptIn { 0% { scale: 0.7; opacity: 0; translate: 0 8px; } 60% { scale: 1.05; opacity: 1; translate: 0 -1px; } 100% { scale: 1; opacity: 1; translate: 0 0; } }
+.prompt kbd { background: var(--ink); color: #fff; border-radius: 6px; padding: 0 6px; margin-right: 6px; font: 800 calc(13px * var(--ui-t)) var(--f-body); }
+/* gamepad face-button glyph (A green, B red, X blue, Y yellow) for prompts and hints */
+.pad-g { display: inline-grid; place-items: center; width: 1.45em; height: 1.45em; border-radius: 50%; margin-right: 6px; vertical-align: -0.28em; font: 800 0.8em/1 var(--f-body); color: #fff; background: #3d7bff; box-shadow: 0 0 0 2px var(--ink); text-shadow: 0 1px 0 rgba(30,26,77,0.5); }
+.pad-g.a { background: #22c46b; } .pad-g.b { background: #ff4d5e; } .pad-g.y { background: #f2b600; }
+/* key / controller-button glyph on a HUD chip (08_hud: the hub's Map chip shows M, or the pad's View button) */
+.mm-key { display: inline-grid; place-items: center; min-width: 22px; height: 22px; box-sizing: border-box; padding: 0 5px; margin-left: 2px; border-radius: 7px; background: var(--ink); color: #fff; font: 800 13px/1 var(--f-body); box-shadow: 0 2px 0 rgba(30,26,77,0.3), inset 0 -2px 0 rgba(255,255,255,0.18); }
+.mm-key.pad { border-radius: 99px; padding: 0 6px; }
+/* (on the Map chip: 30_menus sizes every span of the chip as its 32 px icon box — not this one) */
+.mm-quickbtn .mm-key { display: inline-grid; width: auto; height: 22px; flex: none; }
+.mm-key svg { width: 18px; height: 13px; display: block; }
+.markers { position: absolute; inset: 0; overflow: hidden; isolation: isolate; }
+.marker { position: absolute; left: 0; top: 0; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; gap: 2px; font: 800 max(11px, calc(12px * var(--ui-t))) var(--f-body); color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px rgba(30,26,77,0.7); white-space: nowrap; will-change: transform; }
+.marker .mk { width: 26px; height: 26px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); border: 3px solid var(--ink); background: var(--sun); display: grid; place-items: center;
+  animation: mkIn 0.42s var(--ease-out) backwards; transition: background-color 0.2s;
+  /* glossy toy pin: a light band along the top-left of the bulb and a short drop shadow straight down (both offsets are
+     written in the pin's own frame, which is turned -45 deg) */
+  box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), -2px 2px 0 rgba(30,26,77,0.35); }
+@keyframes mkIn { 0% { scale: 0.2; opacity: 0; } 55% { scale: 1.2; opacity: 1; } 80% { scale: 0.95; } 100% { scale: 1; opacity: 1; } }
+.marker .mk > span { transform: rotate(45deg); font-size: 12px; color: var(--ink); text-shadow: none; }
+.marker.edge .mk { background: var(--coral); }
+/* label: a translucent ink pill ringed in the marker's own colour (--mc, set by 08_hud), so it reads over sky, signs
+   and other labels alike; the distance after the name in gold. 08_hud measures it (markerBox) for the avoidance. */
+.marker .ml { display: flex; align-items: baseline; gap: 5px; padding: 2px 9px 3px; border-radius: 99px; line-height: 1.2;
+  background: rgba(30,26,77,0.7); box-shadow: 0 0 0 2px var(--mc, var(--sun)), 0 3px 0 rgba(30,26,77,0.3); text-shadow: 0 1px 0 rgba(30,26,77,0.9); }
+.marker .ml .md { color: #ffe27a; font-size: max(11px, 0.92em); font-variant-numeric: tabular-nums; }
+.marker.edge .ml { box-shadow: 0 0 0 2px var(--coral), 0 3px 0 rgba(30,26,77,0.3); }
+/* a marker that has no clear place (under a HUD chip or a button cluster, or behind a nearer label: 08_hud markerAvoid)
+   keeps a faint pin and drops its label, so no text is ever read through other text */
+.marker { transition: opacity 0.18s var(--ease-out); }
+.marker.quiet .ml { visibility: hidden; }
+/* (and its faint pin goes behind the others: it used to poke through the pill of the label that pushed it out) */
+.marker.quiet { z-index: -1; }
+.dmgnum { position: absolute; left: 0; top: 0; font: var(--fw-d) calc(18px * var(--ui-t)) var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(2px * var(--ds, 1))) var(--ink); paint-order: stroke fill; pointer-events: none; will-change: transform, opacity; white-space: nowrap; text-shadow: 0 2px 0 var(--ink); }
+.dmgnum.off { display: none; }
+.dmgnum.crit { color: var(--sun); font-size: calc(24px * var(--ui-t)); } .dmgnum.sh { color: #8fd6ff; } .dmgnum.heal { color: #7dffb1; }
+.fps { position: absolute; left: calc(8px + env(safe-area-inset-left, 0px)); bottom: 2px; font: 700 11px monospace; color: #fff; text-shadow: 0 1px 0 #000; }
+.race-speed { font: var(--fw-d) 40px/1 var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(2.5px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); }
+.race-pos { font: var(--fw-d) 52px/1 var(--f-display); color: var(--sun); -webkit-text-stroke: max(1px, calc(3px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); }
+.countdown { position: absolute; inset: 0; display: grid; place-items: center; font: var(--fw-d) min(30vw, 160px)/1 var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(5px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 8px 0 var(--ink); }
+
+/* ---------- Title / hub / results ---------- */
+.title-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+.logo { font: var(--fw-d) clamp(40px, 10vw, 96px)/0.92 var(--f-display); color: #fff; -webkit-text-stroke: max(1px, calc(5px * var(--ds, 1))) var(--ink); paint-order: stroke fill; text-shadow: 0 8px 0 var(--ink), 0 14px 30px rgba(30,26,77,0.4); letter-spacing: 0.01em; transform: rotate(-3deg); }
+.logo .l2 { display: block; color: var(--sun); font-size: 0.62em; letter-spacing: 0.14em; margin-top: 6px; }
+.tagline { font: 800 clamp(14px, 2.6vw, 18px)/1.4 var(--f-body); color: #fff; text-shadow: 0 2px 0 var(--ink); max-width: 560px; }
+.results-stars { display: flex; gap: 8px; justify-content: center; font-size: 44px; }
+.results-stars span { filter: drop-shadow(0 4px 0 var(--ink)); }
+.reward-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.reward { background: #fff; border: 3px solid var(--ink); border-radius: 12px; padding: 6px 10px; display: flex; gap: 6px; align-items: center; font: 800 14px var(--f-body); box-shadow: 0 3px 0 var(--shadow); animation: toastIn 0.4s backwards; }
+.npc-line { background: #fff; border: var(--outline); border-radius: 16px 16px 16px 4px; padding: 10px 14px; font: 700 14px/1.5 var(--f-body); position: relative; }
+.npc-name { font: var(--fw-d) 13px var(--f-display); color: var(--grape-ink); }
+.portrait { width: 64px; height: 64px; border-radius: 16px; border: var(--outline); background: var(--panel-2); flex: none; overflow: hidden; display: grid; place-items: center; }
+.portrait svg { width: 100%; height: 100%; }
+/* Frame-size classes (html.gh-short / gw-narrow / gw-tiny) are set by G.HUD.layoutVars from the
+   game frame, not media queries: while the page is CSS-rotated, the physical viewport is portrait and
+   max-height/max-width queries would pick the wrong rules. */
+html.gh-short .panel { padding: 10px; gap: 8px; }
+html.gh-short .panel-head h2 { font-size: 20px; }
+html.gh-short .btn { min-height: 42px; padding: 8px 14px; font-size: 15px; }
+html.gh-short .btn.big { min-height: 52px; font-size: 18px; }
+html.gh-short .btn.icon { width: 42px; height: 42px; min-height: 0; padding: 0; }
+html.gh-short .logo { font-size: clamp(34px, calc(var(--gh, 100vh) * 0.09), 70px); }
+/* ---------- Screen transitions (07_ui.js) ----------
+   open : wrap gets .ui-enter for ~0.65 s — backdrop fades, content springs in (scale + fade), lists and
+          cards cascade. Everything is interactive from the first frame (no pointer-events games).
+   close: logically immediate; the old wrap stays in place as an inert .ui-ghost (no data-screen, no
+          ids, pointer-events none) for 0.2 s while it fades/shrinks out, then it is removed.
+   refresh after a tab tap: .ui-tabswap slides the new tab body in from the tab's side.
+   Keyframes use the independent scale/translate properties so roots keep their own transforms;
+   :where() keeps these defaults weaker than any screen's own animation. */
+.screen.ui-enter { animation: uiFadeIn 0.18s var(--ease-out) backwards; }
+:where(.screen.ui-enter) > * { animation: uiPop 0.34s var(--ease-out) backwards; }
+:where(.screen.ui-enter.ui-fb) > *, :where(.screen.ui-enter) > :where(.mm-title, .hl-root, .mm-talk-root) { animation: none; }
+:where(.screen.ui-enter) > :where(.mm-res) { animation: uiSettle 0.42s var(--ease-out) backwards; }
+@keyframes uiFadeIn { from { opacity: 0; } }
+@keyframes uiPop { 0% { opacity: 0; scale: 0.9; translate: 0 10px; } 30% { opacity: 1; } 45% { scale: 1.02; translate: 0 -1px; } 72% { scale: 0.995; translate: 0 0; } 100% { opacity: 1; scale: 1; translate: 0 0; } }
+@keyframes uiSettle { from { scale: 1.05; } to { scale: 1; } }
+/* cascade: grids, tile lists, pause-menu buttons, building rail tabs (first six staggered, rest together) */
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > * { animation: uiItemIn 0.26s 0.13s var(--ease-out) backwards; }
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > :nth-child(1) { animation-delay: 0.04s; }
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > :nth-child(2) { animation-delay: 0.058s; }
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > :nth-child(3) { animation-delay: 0.076s; }
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > :nth-child(4) { animation-delay: 0.094s; }
+:where(.screen.ui-enter) :where(.mm-grid, .mm-qm-grid, .mm-langs, .mm-presets, .mm-strip, .grid, .mm-tabs, .mm-kv, .mm-how, .mm-slots, .mm-days, .panel > .col, .panel-body > .col) > :nth-child(5) { animation-delay: 0.112s; }
+@keyframes uiItemIn { 0% { opacity: 0; translate: 0 10px; scale: 0.96; } 65% { opacity: 1; translate: 0 -1px; scale: 1.01; } 100% { opacity: 1; translate: 0 0; scale: 1; } }
+/* progress bars fill up as the screen arrives */
+:where(.screen.ui-enter) :where(.mm-bar, .bar) > i { animation: uiBarFill 0.5s 0.12s var(--ease-out) backwards; transform-origin: left center; }
+@keyframes uiBarFill { from { scale: 0 1; } }
+/* closing copy */
+#ui .ui-ghost, #ui .ui-ghost * { pointer-events: none !important; }
+.screen.ui-ghost { animation: uiFadeOut 0.2s var(--ease-in) forwards; }
+#ui .screen.ui-ghost > * { animation: uiPopOut 0.2s var(--ease-in) forwards; }
+#ui .screen.ui-ghost.ui-fb > *, #ui .screen.ui-ghost > :where(.mm-title, .hl-root, .mm-res, .mm-talk-root) { animation: none; }
+@keyframes uiFadeOut { to { opacity: 0; } }
+@keyframes uiPopOut { to { opacity: 0; scale: 0.94; translate: 0 8px; } }
+/* hand-over (close + open in one tap): one steady backdrop — the closing copy drops its own and the
+   new screen's is there from the first frame (no darker dip, never two backdrop blurs) */
+#ui .screen.ui-ghost.ui-handover { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.screen.ui-enter.ui-keepbg { animation: none; }
+/* tab switch: new body slides in from the side of the tapped tab (--tab-dx/--tab-dy set by 07_ui.js) */
+.ui-tabswap :where(.panel-body, .mm-body) > * { animation: uiTabIn 0.24s var(--ease-out) backwards; }
+@keyframes uiTabIn { from { opacity: 0; translate: calc(var(--tab-dx, 0) * 1px) calc(var(--tab-dy, 0) * 1px); } }
+.ui-tabswap :where(.tab.on, .mm-tab.on, .mm-subtab.on) { animation: uiTabPop 0.32s var(--ease-out); }
+@keyframes uiTabPop { 0% { scale: 0.9; } 55% { scale: 1.07; } 100% { scale: 1; } }
+/* picking a card / language / preset / slot: the new selection pops */
+.ui-selpop :where(.mm-lang.on, .mm-preset.on, .mm-wchip.on, .mm-slot.sel, .mm-card.sel, .card.sel, .ex-card.sel, .mm-socket.full) { animation: uiSelPop 0.34s var(--ease-out); }
+@keyframes uiSelPop { 0% { scale: 0.92; } 50% { scale: 1.05; } 100% { scale: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+.reduced-motion *, .reduced-motion *::before, .reduced-motion *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+/* reduced motion: presses still give feedback, but without travel or overshoot */
+.reduced-motion :is(.btn, .tbtn, .wslot, .crosshair, .toggle, .objective .bar > i), .reduced-motion .toggle::after,
+.reduced-motion :where(.tab, .card.clickable, .mm-tab, .mm-big, .mm-qm, .mm-lang, .mm-preset, .mm-subtab, .mm-wchip, .mm-card.clickable, .mm-slot, .mm-socket, .mm-quickbtn, .mm-sugchip, .mm-day) { transition-duration: 0.01ms !important; }
+.reduced-motion .btn.pressed { transform: translateY(2px); }
+.reduced-motion .tbtn.down { transform: scale(calc(var(--hud-scale) * 0.95)); }
+.reduced-motion .crosshair.on-target { scale: 1; }
+
+/* Narrow landscape phones: shrink the top-centre column so it clears the vitals and minimap. */
+/* --tc-k is that scale: a mode row's small text can keep to the 11 px floor with max(11px / var(--tc-k, 1), ...). */
+html.gw-narrow .hud-tc { --tc-k: 0.82; left: 55%; transform: translateX(-50%) scale(var(--tc-k)); transform-origin: top center; }
+/* (0.79: its 14 px chips still draw at 11 px, the smallest HUD text) */
+#hud .hud-chip.boss-phase { font-size: max(calc(11px / var(--tc-k, 1)), calc(12px * var(--ui-t, 1))); white-space: nowrap; }
+html.gw-tiny .hud-tc { --tc-k: 0.79; left: 56%; transform: translateX(-50%) scale(var(--tc-k)); }
+/* Panels that reuse the loading orb (WebGL context-loss overlay): room for the bounce inside the frame. */
+.panel .ld-orb { width: 56px; height: 56px; margin-top: 22px; flex: none; }
+
+/* While a menu is open: banners stay hidden (they would draw over the pause menu) and toasts
+   move to a bottom lane so they never cover a results title or panel header. */
+#ui.ui-menu #banner { display: none !important; }
+#ui.ui-menu #toasts { top: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); flex-direction: column-reverse; }
+/* A banner in play holds the toast lane (07_ui): toasts already up step aside until it is gone, then finish their time. */
+#toasts.play.b-hold .toast { opacity: 0; transition: opacity 0.14s; }
+#toasts.play .toast { transition: opacity 0.2s; }
+/* ...and when it cannot sit under the top-centre column without reaching the crosshair, the column's extra rows (a mode's
+   hint: the tutorial's Beepo line, Fountain Guard's wave rows) fade aside for it; timer / team / boss bars stay (07_ui) */
+#hud .hud-tc > .col { transition: opacity 0.2s; }
+#hud.b-tc .hud-tc > .col { opacity: 0; transition-duration: 0.14s; }
+
+/* Pause: the button list scrolls if it has to (padding keeps focus rings inside the scroller); when it would not fit
+   (big text on a small phone: 07b adds .two) the buttons under Resume share rows of two. A list that fits stays one
+   column, so a controller's D-pad simply walks down it. */
+.pause-btns { min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; padding: 8px; margin: -8px; }
+/* Pause / Settings headers and the pause buttons share the game's icon set (drawn here so the core screens stay as
+   they are): a sunny pause badge, a gear, and one glyph per pause action in the label's own colour. */
+:is([data-screen="pause"], [data-screen="settings"]) .panel-head h2 { display: flex; align-items: center; gap: 10px; }
+:is([data-screen="pause"], [data-screen="settings"]) .panel-head h2::before { content: ''; width: 34px; height: 34px; flex: none; background: center / contain no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23ffd23f' stroke='%231e1a4d' stroke-width='2.6'/%3E%3Crect x='10.5' y='9' width='4' height='14' rx='1.6' fill='%231e1a4d'/%3E%3Crect x='17.5' y='9' width='4' height='14' rx='1.6' fill='%231e1a4d'/%3E%3C/svg%3E"); }
+[data-screen="settings"] .panel-head h2::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M14 3h4l.8 3.5 2.6 1.1 3-2 2.8 2.8-2 3 1.1 2.6L29 14v4l-3.5.8-1.1 2.6 2 3-2.8 2.8-3-2-2.6 1.1L18 29h-4l-.8-3.5-2.6-1.1-3 2-2.8-2.8 2-3-1.1-2.6L3 18v-4l3.5-.8 1.1-2.6-2-3 2.8-2.8 3 2 2.6-1.1z' fill='%23c9d4f0' stroke='%231e1a4d' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='16' r='4.5' fill='%23fff' stroke='%231e1a4d' stroke-width='2'/%3E%3C/svg%3E"); }
+.screen.ui-enter:is([data-screen="pause"], [data-screen="settings"]) .panel-head h2::before { animation: mmPortraitIn 0.5s 0.06s var(--ease-out) backwards; }
+[data-screen="pause"] .btn > span[data-i18n]::before { content: ''; display: inline-block; width: 1.2em; height: 1.2em; margin-right: 0.45em; vertical-align: -0.24em; background: center / contain no-repeat; }
+[data-screen="pause"] .btn > span[data-i18n="pause.resume"]::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 5.5v13l11-6.5z' fill='%231e1a4d' stroke='%231e1a4d' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+[data-screen="pause"] .btn > span[data-i18n="pause.restart"]::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 12a7 7 0 1 1-2.05-4.95' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M19.5 3.5v5h-5' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+[data-screen="pause"] .btn > span[data-i18n="pause.settings"]::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.6 2.5h2.8l.5 2.5 1.9.8 2.1-1.4 2 2-1.4 2.1.8 1.9 2.5.5v2.8l-2.5.5-.8 1.9 1.4 2.1-2 2-2.1-1.4-1.9.8-.5 2.5h-2.8l-.5-2.5-1.9-.8-2.1 1.4-2-2 1.4-2.1-.8-1.9-2.5-.5v-2.8l2.5-.5.8-1.9-1.4-2.1 2-2 2.1 1.4 1.9-.8z' fill='none' stroke='%231e1a4d' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='12' r='3' fill='none' stroke='%231e1a4d' stroke-width='2'/%3E%3C/svg%3E"); }
+[data-screen="pause"] .btn > span[data-i18n="hl.title"]::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%23fff' stroke-width='2.4'%3E%3Ccircle cx='7.5' cy='16.5' r='3.6'/%3E%3Ccircle cx='17' cy='16' r='4.6'/%3E%3Ccircle cx='17.5' cy='6.5' r='2.8'/%3E%3Cpath d='M4 7.5h7M7.5 4v7' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E"); }
+[data-screen="pause"] .btn > span[data-i18n="pause.quit"]::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.5 11.5L12 4l8.5 7.5' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M6 10v9.5h4.5v-5h3v5H18V10' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+/* (the pause list breathes a little more on roomy frames) */
+html:not(.gh-short) [data-screen="pause"] .pause-btns { gap: 12px; }
+.pause-btns.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-content: start; }
+.pause-btns.two > :first-child, .pause-btns.two > :last-child:nth-child(even) { grid-column: 1 / -1; }
+
+/* ---------- Text & UI size: menus ----------
+   Every screen's content is zoomed by --ui-mz (08_hud layoutVars: S 0.92 / M 1 / L 1.1 / XL 1.2, eased on
+   short frames). zoom keeps percentages and insets, so panels still fit the frame and just scroll more.
+   The button-layout editor works in game-frame pixels and is never zoomed. */
+#ui .screen:not([data-screen="hud-editor"]) { zoom: var(--ui-mz, 1); }
+
+/* ---------- Sound captions (08_hud, fed by G.Audio.onCaption) ----------
+   Bottom-centre band above the weapon block and below the crosshair; 08_hud places it (--cap-b bottom,
+   --cap-x centre, --cap-w width, --cap-fs font) when a caption arrives. At most 2 lines on a soft dark
+   backing, each with an arrow toward the sound (up = ahead). Lines pop in (.in) and fade out (.out). */
+.captions { position: absolute; left: var(--cap-x, 50%); bottom: var(--cap-b, 24%); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px;
+  width: max-content; max-width: var(--cap-w, min(calc(var(--gw, 100vw) * 0.62), 560px)); pointer-events: none; }
+.cap { display: flex; align-items: center; gap: 0.4em; max-width: 100%; box-sizing: border-box; background: rgba(30,26,77,0.62); color: #fff; border-radius: 12px; padding: 2px 12px 2px 7px;
+  font: 800 var(--cap-fs, 16px)/1.25 var(--f-body); text-shadow: 0 1px 0 rgba(0,0,0,0.35); }
+.cap.in { animation: capIn 0.26s var(--ease-out) backwards; }
+.cap.out { animation: capOut 0.3s var(--ease-in) forwards; }
+@keyframes capIn { from { opacity: 0; translate: 0 6px; } }
+@keyframes capOut { to { opacity: 0; } }
+.cap > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.cap .ar { width: 1.15em; height: 1.15em; flex: none; display: block; color: var(--sun); }
+.cap .ar svg { width: 100%; height: 100%; display: block; }
+.cap[data-dir="left"] .ar svg { rotate: -90deg; } .cap[data-dir="right"] .ar svg { rotate: 90deg; } .cap[data-dir="behind"] .ar svg { rotate: 180deg; }
+
+/* ---------- Controller focus (06_input menu navigation) ---------- */
+/* deep grape (not the sun-yellow keyboard ring): it reads on yellow buttons, white panels and the 3D scene alike;
+   an outline only, so the control's own shadow and animations stay untouched */
+#ui .gp-focus { outline: 4px solid #6b4dff !important; outline-offset: 3px; }
+#ui .gp-focus.toggle, #ui input[type=range].gp-focus, #ui select.gp-focus { outline-offset: 4px; }
+#hud .hud-chip .pad-g { margin-right: 2px; }
+
+/* ---------- Settings additions (07b) ---------- */
+.set-sec { font: var(--fw-d) 15px/1.2 var(--f-display); color: var(--grape-ink); margin: 14px 0 0; letter-spacing: 0.02em; display: flex; align-items: center; gap: 8px; }
+.set-sec::after { content: ''; flex: 1; height: 3px; border-radius: 3px; background: rgba(30,26,77,0.1); }
+.set-sec:first-child { margin-top: 2px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; justify-self: start; }
+.seg > button { min-height: 38px; min-width: 44px; padding: 6px 12px; border-radius: 11px; border: var(--outline); background: #fff; color: var(--ink); font: 800 14px/1.1 var(--f-body); cursor: pointer; box-shadow: 0 3px 0 var(--ink); }
+.seg > button.on { background: var(--sun); color: var(--ink); text-shadow: none; }
+.seg > button:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; justify-self: start; }
+.swatches > button { width: 38px; height: 38px; border-radius: 50%; border: var(--outline); box-shadow: 0 3px 0 var(--ink); cursor: pointer; padding: 0; position: relative; }
+.swatches > button.on::after { content: ''; position: absolute; inset: -7px; border-radius: 50%; border: 3px solid var(--grape-ink); }
+.swatches > button:focus-visible { outline: 3px solid var(--sun); outline-offset: 5px; }
+.set-note { display: flex; align-items: center; gap: 8px; font: 800 14px/1.35 var(--f-body); }
+.set-note svg { width: 22px; height: 22px; flex: none; }
+.set-note.bad { color: #c2263a; }
+.set-build { font: 800 14px var(--f-body); font-variant-numeric: tabular-nums; user-select: text; -webkit-user-select: text; }
+.save-code { width: 100%; box-sizing: border-box; min-height: 96px; max-height: 40vh; resize: none; border: var(--outline); border-radius: 12px; padding: 8px 10px; background: #fff; color: var(--ink);
+  font: 600 12px/1.35 ui-monospace, Menlo, Consolas, monospace; word-break: break-all; user-select: text; -webkit-user-select: text; touch-action: auto; }
+.save-err { color: #c2263a; font: 800 14px/1.4 var(--f-body); min-height: 1.4em; margin: 0; }
+.save-rec p { margin: 0; line-height: 1.5; }
+.save-rec .card { gap: 2px; }
+
+/* ---------- Storage-blocked notice (07b): a persistent pill on the title and in town ---------- */
+.save-warn { position: absolute; left: 50%; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); display: flex; align-items: center; gap: 6px;
+  max-width: calc(var(--gw, 100vw) * 0.5); box-sizing: border-box; padding: 4px 12px 4px 8px; border-radius: 99px; border: 3px solid var(--ink); background: #fff3c4; color: var(--ink);
+  font: 800 max(13px, calc(13px * var(--ui-t)))/1.25 var(--f-body); box-shadow: 0 3px 0 var(--shadow); pointer-events: auto; cursor: pointer; }
+.save-warn svg { width: 20px; height: 20px; flex: none; }
+.save-warn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+#hud .save-warn-chip { cursor: pointer; font-size: max(13px, calc(13px * var(--ui-t))); padding: 3px 10px 3px 6px; }
+#hud .save-warn-chip svg { width: 18px; height: 18px; flex: none; }
+/* Settings tabs on short frames (and with big text): one compact row that scrolls sideways if it must */
+html.gh-short #ui [data-screen="settings"] .tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; margin-bottom: -4px; }
+html.gh-short #ui [data-screen="settings"] .tabs::-webkit-scrollbar { display: none; }
+html.gh-short #ui [data-screen="settings"] .tab { padding: 6px 10px; font-size: 13px; flex: none; }
+
+}

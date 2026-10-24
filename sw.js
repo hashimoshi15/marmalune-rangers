@@ -1,4 +1,4 @@
-// build 1.2.0-3424d51-81ac27b6
+// build 1.3.0-8e69389-64d40b47
 // Marmalune Rangers — service worker for the public site (GitHub Pages). Copied to the site root by
 // tools/make_public.mjs, which fills in BUILD / PRECACHE / HASHED / LAZY below; scope = the site folder.
 //   install   precache this build's files into its own cache ('mr-v' + build id). Content-hashed files another
@@ -6,8 +6,8 @@
 //             changed. The page itself must carry this build id (a deploy landing mid-install fails the install,
 //             and the browser simply tries again on a later update check).
 //   activate  delete the caches of older builds (never the font cache), enable navigation preload, claim the page.
-//             Baked textures (LAZY) are not precached: cached on first use, and the ones a device already used are
-//             carried over (revalidated) when the next build installs.
+//             Baked textures and language packs (LAZY) are not precached: cached on first use, and the ones a device
+//             already used are carried over when the next build installs (content-hashed ones copied, others revalidated).
 //   fetch     page (navigation / index.html): network first (navigation preload; a slow network gives way to the
 //             cached page after a few seconds), the cached page when offline. Hashed files: cache first (any
 //             build's cache). Other files of this build (manifest, icons, textures): this build's cache first.
@@ -16,10 +16,10 @@
 //             update — sent by the page only when the player taps "Restart" (99_main G.PWA), so a new version never
 //             swaps code under a running game.
 'use strict';
-const BUILD = {"id":"1.2.0-3424d51-81ac27b6","version":"1.2.0","commit":"3424d51"};
-const PRECACHE = ["three.7b1c5d75b2.js","core.a34883121b.js","world.69dc8d6cb8.js","data.c1a4d75603.js","geo.2ebbe8c87e.js","actors.a5a3bea646.js","pve.8403ec159e.js","arena.2eddb67b48.js","royale.3548ebfc3e.js","menus.c2d015aa74.js","lang-de.122f963e9b.js","lang-es.eefec63a4d.js","lang-fr.b044673d63.js","lang-id.92195a9871.js","lang-it.8bdac96b29.js","lang-ko.162ecb55d9.js","lang-pt-br.a9a00eb4d8.js","lang-ru.287da492d6.js","lang-zh-hans.ed766516fb.js","lang-zh-hant.135144d69b.js","lang-more.0dbdbab1b8.js","main.cb191116bb.js","style.4e0cb382d6.css","assets/manifest.json","icon.svg","icon-192.png","manifest.webmanifest","./"];
-const HASHED = new Set(["three.7b1c5d75b2.js","core.a34883121b.js","world.69dc8d6cb8.js","data.c1a4d75603.js","geo.2ebbe8c87e.js","actors.a5a3bea646.js","pve.8403ec159e.js","arena.2eddb67b48.js","royale.3548ebfc3e.js","menus.c2d015aa74.js","lang-de.122f963e9b.js","lang-es.eefec63a4d.js","lang-fr.b044673d63.js","lang-id.92195a9871.js","lang-it.8bdac96b29.js","lang-ko.162ecb55d9.js","lang-pt-br.a9a00eb4d8.js","lang-ru.287da492d6.js","lang-zh-hans.ed766516fb.js","lang-zh-hant.135144d69b.js","lang-more.0dbdbab1b8.js","main.cb191116bb.js","style.4e0cb382d6.css"]);
-const LAZY = ["assets/cloud_noise_1024.png","assets/surface_grain_512.png","assets/terrain_detail_1024.png"];                     // baked textures: cached on first use, kept across updates once used
+const BUILD = {"id":"1.3.0-8e69389-64d40b47","version":"1.3.0","commit":"8e69389"};
+const PRECACHE = ["three.7b1c5d75b2.js","core.83b77a8797.js","world.b2c77c0671.js","data.ecb832ab74.js","geo.cdb57ca820.js","actors.ed582a6d95.js","pve.2ce7ba63af.js","arena.93a2a9a390.js","royale.bd0f5abd76.js","menus.77d0ea9ba5.js","lang-en.a2ee943995.js","main.cb191116bb.js","style.3b45869c7a.css","assets/manifest.json","icon.svg","icon-192.png","manifest.webmanifest","./"];
+const HASHED = new Set(["three.7b1c5d75b2.js","core.83b77a8797.js","world.b2c77c0671.js","data.ecb832ab74.js","geo.cdb57ca820.js","actors.ed582a6d95.js","pve.2ce7ba63af.js","arena.93a2a9a390.js","royale.bd0f5abd76.js","menus.77d0ea9ba5.js","lang-en.a2ee943995.js","main.cb191116bb.js","lang-de.7159607968.js","lang-es.87e4531680.js","lang-fr.377491dd25.js","lang-id.94f549ddce.js","lang-it.a600970f10.js","lang-ja.8d8a76f665.js","lang-ko.e319c479b6.js","lang-pt-br.8a50fb254b.js","lang-ru.d6dbdab0a9.js","lang-zh-hans.2407c6082e.js","lang-zh-hant.f5e3f8d8e5.js","style.3b45869c7a.css"]);
+const LAZY = ["lang-de.7159607968.js","lang-es.87e4531680.js","lang-fr.377491dd25.js","lang-id.94f549ddce.js","lang-it.a600970f10.js","lang-ja.8d8a76f665.js","lang-ko.e319c479b6.js","lang-pt-br.8a50fb254b.js","lang-ru.d6dbdab0a9.js","lang-zh-hans.2407c6082e.js","lang-zh-hant.f5e3f8d8e5.js","assets/surface_grain_512.png","assets/terrain_detail_1024.png"];                     // baked textures + language packs: cached on first use, kept across updates once used
 const PREFIX = 'mr-v';
 const CACHE = PREFIX + BUILD.id;
 const FONT_CACHE = 'mr-fonts';
@@ -57,13 +57,23 @@ async function precache() {
   const queue = PRECACHE.slice();
   const lane = async () => { while (queue.length) await one(queue.shift()); };
   await Promise.all([lane(), lane(), lane(), lane()]);
-  // textures this device already used under an older build come along (revalidated: usually a cheap 304)
+  // textures / language packs this device already used under an older build come along: a content-hashed file is
+  // copied from the old cache (it never changes), anything else revalidated (usually a cheap 304). A language whose
+  // pack changed in this build (new hashed name) is fetched anew when the device had an older pack of it, so an update
+  // installed online keeps the player's language offline too.
+  const langsUsed = new Set();
+  for (const n of others) {
+    for (const req of await (await caches.open(n)).keys()) { const m = /\/lang-([A-Za-z-]+)\.[0-9a-f]{10}\.js$/.exec(req.url); if (m) langsUsed.add(m[1]); }
+  }
   for (const path of LAZY) {
     const url = abs(path);
-    let had = false;
-    for (const n of others) if (await (await caches.open(n)).match(url)) { had = true; break; }
-    if (!had || await cache.match(url)) continue;
-    try { const res = await fetch(url, { cache: 'no-cache', credentials: 'same-origin' }); if (res.ok) await cache.put(url, res); } catch (err) { /* first use will fetch it */ }
+    if (await cache.match(url)) continue;
+    let had = null;
+    for (const n of others) { had = await (await caches.open(n)).match(url); if (had) break; }
+    const lm = /^lang-([A-Za-z-]+)\.[0-9a-f]{10}\.js$/.exec(path);
+    if (!had && !(lm && langsUsed.has(lm[1]))) continue;
+    if (had && HASHED.has(path)) { await cache.put(url, had); continue; }
+    try { const res = await fetch(url, { cache: HASHED.has(path) ? 'default' : 'no-cache', credentials: 'same-origin' }); if (res.ok) await cache.put(url, res); } catch (err) { /* first use will fetch it */ }
   }
 }
 self.addEventListener('install', e => { e.waitUntil(precache()); });

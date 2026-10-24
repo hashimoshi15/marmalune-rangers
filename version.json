@@ -1,10 +1,10 @@
 {
  "name": "Marmalune Rangers",
- "version": "1.2.0",
- "commit": "3424d51",
- "date": "2026-10-17",
+ "version": "1.3.0",
+ "commit": "8e69389",
+ "date": "2026-10-24",
  "channel": "public",
- "id": "1.2.0-3424d51-81ac27b6",
+ "id": "1.3.0-8e69389-64d40b47",
  "iconKey": "0a0f2e76ffcf4c3d",
  "files": [
   {
@@ -12,100 +12,100 @@
    "bytes": 668024
   },
   {
-   "path": "core.a34883121b.js",
-   "bytes": 519399
+   "path": "core.83b77a8797.js",
+   "bytes": 597876
   },
   {
-   "path": "world.69dc8d6cb8.js",
-   "bytes": 220667
+   "path": "world.b2c77c0671.js",
+   "bytes": 256438
   },
   {
-   "path": "data.c1a4d75603.js",
-   "bytes": 245170
+   "path": "data.ecb832ab74.js",
+   "bytes": 245359
   },
   {
-   "path": "geo.2ebbe8c87e.js",
-   "bytes": 528418
+   "path": "geo.cdb57ca820.js",
+   "bytes": 643271
   },
   {
-   "path": "actors.a5a3bea646.js",
-   "bytes": 513313
+   "path": "actors.ed582a6d95.js",
+   "bytes": 559867
   },
   {
-   "path": "pve.8403ec159e.js",
-   "bytes": 496414
+   "path": "pve.2ce7ba63af.js",
+   "bytes": 768038
   },
   {
-   "path": "arena.2eddb67b48.js",
-   "bytes": 511467
+   "path": "arena.93a2a9a390.js",
+   "bytes": 590863
   },
   {
-   "path": "royale.3548ebfc3e.js",
-   "bytes": 441779
+   "path": "royale.bd0f5abd76.js",
+   "bytes": 491967
   },
   {
-   "path": "menus.c2d015aa74.js",
-   "bytes": 275798
+   "path": "menus.77d0ea9ba5.js",
+   "bytes": 283518
   },
   {
-   "path": "lang-de.122f963e9b.js",
-   "bytes": 106352
-  },
-  {
-   "path": "lang-es.eefec63a4d.js",
-   "bytes": 109076
-  },
-  {
-   "path": "lang-fr.b044673d63.js",
-   "bytes": 110621
-  },
-  {
-   "path": "lang-id.92195a9871.js",
-   "bytes": 103905
-  },
-  {
-   "path": "lang-it.8bdac96b29.js",
-   "bytes": 107665
-  },
-  {
-   "path": "lang-ko.162ecb55d9.js",
-   "bytes": 111987
-  },
-  {
-   "path": "lang-pt-br.a9a00eb4d8.js",
-   "bytes": 105931
-  },
-  {
-   "path": "lang-ru.287da492d6.js",
-   "bytes": 143283
-  },
-  {
-   "path": "lang-zh-hans.ed766516fb.js",
-   "bytes": 103509
-  },
-  {
-   "path": "lang-zh-hant.135144d69b.js",
-   "bytes": 103018
-  },
-  {
-   "path": "lang-more.0dbdbab1b8.js",
-   "bytes": 247438
+   "path": "lang-en.a2ee943995.js",
+   "bytes": 18336
   },
   {
    "path": "main.cb191116bb.js",
    "bytes": 30970
   },
   {
-   "path": "style.4e0cb382d6.css",
-   "bytes": 126782
+   "path": "lang-de.7159607968.js",
+   "bytes": 128062
   },
   {
-   "path": "assets/cloud_noise_1024.png",
-   "bytes": 351271
+   "path": "lang-es.87e4531680.js",
+   "bytes": 130879
+  },
+  {
+   "path": "lang-fr.377491dd25.js",
+   "bytes": 132897
+  },
+  {
+   "path": "lang-id.94f549ddce.js",
+   "bytes": 124701
+  },
+  {
+   "path": "lang-it.a600970f10.js",
+   "bytes": 129368
+  },
+  {
+   "path": "lang-ja.8d8a76f665.js",
+   "bytes": 26254
+  },
+  {
+   "path": "lang-ko.e319c479b6.js",
+   "bytes": 135864
+  },
+  {
+   "path": "lang-pt-br.8a50fb254b.js",
+   "bytes": 127662
+  },
+  {
+   "path": "lang-ru.d6dbdab0a9.js",
+   "bytes": 173571
+  },
+  {
+   "path": "lang-zh-hans.2407c6082e.js",
+   "bytes": 124516
+  },
+  {
+   "path": "lang-zh-hant.f5e3f8d8e5.js",
+   "bytes": 124102
+  },
+  {
+   "path": "style.3b45869c7a.css",
+   "bytes": 145404
   },
   {
    "path": "assets/manifest.json",
-   "bytes": 456
+   "bytes": 344
   },
   {
    "path": "assets/surface_grain_512.png",
@@ -141,12 +141,34 @@
   },
   {
    "path": "index.html",
-   "bytes": 30162
+   "bytes": 30081
   },
   {
    "path": "sw.js",
-   "bytes": 9990
+   "bytes": 10822
   }
  ],
- "previous": []
+ "previous": [
+  "actors.a5a3bea646.js",
+  "arena.2eddb67b48.js",
+  "core.a34883121b.js",
+  "data.c1a4d75603.js",
+  "geo.2ebbe8c87e.js",
+  "lang-de.122f963e9b.js",
+  "lang-es.eefec63a4d.js",
+  "lang-fr.b044673d63.js",
+  "lang-id.92195a9871.js",
+  "lang-it.8bdac96b29.js",
+  "lang-ko.162ecb55d9.js",
+  "lang-more.0dbdbab1b8.js",
+  "lang-pt-br.a9a00eb4d8.js",
+  "lang-ru.287da492d6.js",
+  "lang-zh-hans.ed766516fb.js",
+  "lang-zh-hant.135144d69b.js",
+  "menus.c2d015aa74.js",
+  "pve.8403ec159e.js",
+  "royale.3548ebfc3e.js",
+  "style.4e0cb382d6.css",
+  "world.69dc8d6cb8.js"
+ ]
 }
